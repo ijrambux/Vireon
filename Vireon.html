@@ -1,0 +1,2735 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vireon - التعليمية</title>
+    <style>
+        /* ===== إعادة ضبط ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            background: linear-gradient(145deg, #0b2e1a, #051a0e, #021008);
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* ===== النجوم ===== */
+        #stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 6px rgba(255, 255, 255, 0.7);
+            animation: twinkle var(--d) ease-in-out infinite alternate;
+            width: var(--s);
+            height: var(--s);
+            top: var(--t);
+            left: var(--l);
+            will-change: transform, opacity;
+        }
+        @keyframes twinkle {
+            0% {
+                opacity: 0.2;
+                transform: scale(0.7);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* ===== شاشة "أهلاً" ===== */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            pointer-events: none;
+            transition: opacity 1.2s ease;
+        }
+        #splash-screen h1 {
+            font-size: clamp(3rem, 12vw, 7rem);
+            font-weight: 900;
+            color: #fff;
+            text-shadow: 0 0 20px #a8f0a0, 0 0 40px #4caf50, 0 0 80px #2e7d32;
+            letter-spacing: clamp(4px, 1vw, 12px);
+            animation: pulseGlow 1.8s ease-in-out infinite alternate;
+            user-select: none;
+        }
+        @keyframes pulseGlow {
+            0% {
+                text-shadow: 0 0 20px #a8f0a0, 0 0 40px #4caf50, 0 0 80px #2e7d32;
+                transform: scale(1);
+            }
+            100% {
+                text-shadow: 0 0 30px #c8ffb0, 0 0 60px #66bb6a, 0 0 100px #388e3c;
+                transform: scale(1.05);
+            }
+        }
+        #splash-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* ===== الصفحة الرئيسية ===== */
+        #main-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            pointer-events: none;
+        }
+        #main-page.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ===== شريط Vireon ===== */
+        .vireon-strip {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: min(75%, 750px);
+            height: clamp(80px, 14vh, 140px);
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
+            border: 2px solid rgba(76, 175, 80, 0.3);
+            border-radius: clamp(20px, 3vw, 30px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7);
+            transition: all 1.2s cubic-bezier(0.34, 1.2, 0.64, 1);
+            z-index: 2;
+            pointer-events: none;
+        }
+        .vireon-strip h1 {
+            font-size: clamp(2.2rem, 8vw, 5rem);
+            font-weight: 800;
+            color: #e8f5e9;
+            text-shadow: 0 0 30px #4caf50, 0 0 60px #2e7d32;
+            letter-spacing: clamp(6px, 1.2vw, 12px);
+            white-space: nowrap;
+        }
+        .vireon-strip.moved-up {
+            top: clamp(12px, 2vh, 25px);
+            transform: translateX(-50%);
+            width: auto;
+            height: auto;
+            padding: clamp(6px, 1vh, 12px) clamp(20px, 4vw, 40px);
+            background: rgba(0, 20, 5, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1.5px solid rgba(76, 175, 80, 0.4);
+            border-radius: clamp(30px, 5vw, 60px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+        .vireon-strip.moved-up h1 {
+            font-size: clamp(1.4rem, 4vw, 2.8rem);
+            letter-spacing: clamp(4px, 0.8vw, 10px);
+        }
+        .vireon-strip.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* ===== اسم Vireon المستقل ===== */
+        #vireonName {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(2.2rem, 8vw, 5rem);
+            font-weight: 800;
+            color: #e8f5e9;
+            text-shadow: 0 0 30px #4caf50, 0 0 60px #2e7d32;
+            letter-spacing: clamp(6px, 1.2vw, 12px);
+            white-space: nowrap;
+            transition: all 1.2s cubic-bezier(0.34, 1.2, 0.64, 1);
+            z-index: 3;
+            opacity: 0;
+            pointer-events: none;
+        }
+        #vireonName.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #vireonName.center {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(3.5rem, 14vw, 8rem);
+            text-shadow: 0 0 40px #4caf50, 0 0 80px #2e7d32;
+            letter-spacing: clamp(8px, 2vw, 16px);
+        }
+        #vireonName.top-left {
+            top: clamp(8px, 1.5vh, 12px);
+            left: clamp(12px, 2vw, 20px);
+            transform: none;
+            font-size: clamp(1rem, 2.5vw, 1.8rem);
+            text-shadow: 0 0 15px #4caf50, 0 0 30px #2e7d32;
+            letter-spacing: clamp(3px, 0.5vw, 6px);
+        }
+
+        /* ===== مربع الاشتراك ===== */
+        .subscribe-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: min(90%, 500px);
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            z-index: 5;
+        }
+        .subscribe-container.visible {
+            opacity: 1;
+        }
+        .subscribe-container.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .subscribe-box {
+            background: rgba(10, 30, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(76, 175, 80, 0.5);
+            border-radius: clamp(20px, 3vw, 28px);
+            padding: clamp(25px, 4vh, 40px) clamp(20px, 3vw, 35px);
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            cursor: pointer;
+            transition: transform 0.3s ease, opacity 0.5s ease;
+            position: relative;
+            overflow: hidden;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .subscribe-box:hover {
+            transform: scale(1.03);
+        }
+        .subscribe-box .icon {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            display: block;
+            margin-bottom: 8px;
+            transition: opacity 0.3s ease;
+        }
+        .subscribe-box h2 {
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            color: #fff;
+            margin-bottom: 6px;
+        }
+        .subscribe-box h2 .highlight {
+            color: #81c784;
+            text-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+        }
+        .subscribe-box p {
+            font-size: clamp(0.8rem, 1.5vw, 1rem);
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .subscribe-box .sub-text {
+            margin-top: 10px;
+            font-size: clamp(0.7rem, 1vw, 0.85rem);
+            color: rgba(255, 255, 255, 0.35);
+        }
+
+        /* ===== حالة الاشتراك ===== */
+        .subscribe-box .subscribed-content {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            animation: fadePop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .subscribe-box .subscribed-content .big-check {
+            font-size: clamp(3rem, 6vw, 4.5rem);
+            animation: checkBounce 0.8s ease;
+        }
+        .subscribe-box .subscribed-content .thanks-text {
+            font-size: clamp(1.4rem, 3vw, 2.2rem);
+            font-weight: 800;
+            color: #e8f5e9;
+            text-shadow: 0 0 30px rgba(76, 175, 80, 0.4);
+            letter-spacing: 2px;
+        }
+        .subscribe-box .subscribed-content .thanks-sub {
+            font-size: clamp(0.85rem, 1.2vw, 1.1rem);
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .subscribe-box .subscribed-content .countdown-wrap {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px 18px;
+            border-radius: 30px;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+        .subscribe-box .subscribed-content .countdown-wrap .timer {
+            font-size: clamp(1.2rem, 2vw, 1.8rem);
+            font-weight: 700;
+            color: #a5d6a7;
+            min-width: 30px;
+            text-align: center;
+        }
+        .subscribe-box .subscribed-content .countdown-wrap .timer-label {
+            font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 1px;
+        }
+        .subscribe-box .subscribed-content .countdown-wrap .progress-ring {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 3px solid rgba(76, 175, 80, 0.15);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .subscribe-box .subscribed-content .countdown-wrap .progress-ring .ring-fill {
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 3px solid #66bb6a;
+            border-top-color: transparent;
+            border-right-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        @keyframes checkBounce {
+            0% {
+                transform: scale(0) rotate(-20deg);
+                opacity: 0;
+            }
+            60% {
+                transform: scale(1.3) rotate(5deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+            }
+        }
+        @keyframes fadePop {
+            0% {
+                transform: scale(0.6);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .subscribe-box.subscribed {
+            border-color: #66bb6a;
+            box-shadow: 0 0 60px rgba(76, 175, 80, 0.25);
+            cursor: default;
+            background: rgba(10, 35, 18, 0.92);
+        }
+        .subscribe-box.subscribed:hover {
+            transform: none;
+        }
+        .subscribe-box.subscribed .icon,
+        .subscribe-box.subscribed .sub-text,
+        .subscribe-box.subscribed>h2,
+        .subscribe-box.subscribed>p {
+            display: none;
+        }
+        .subscribe-box.subscribed .subscribed-content {
+            display: flex;
+        }
+        .subscribe-box .exploding {
+            animation: explodeBox 0.5s ease forwards;
+        }
+        @keyframes explodeBox {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2) rotate(5deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0) rotate(20deg);
+                opacity: 0;
+            }
+        }
+
+        /* ===== زر "التالي" ===== */
+        .next-button {
+            position: absolute;
+            bottom: clamp(50px, 10vh, 80px);
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            z-index: 6;
+            font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+            font-weight: 700;
+            color: #e8f5e9;
+            background: rgba(0, 20, 5, 0.4);
+            backdrop-filter: blur(8px);
+            padding: clamp(8px, 1.2vh, 12px) clamp(25px, 4vw, 40px);
+            border-radius: clamp(30px, 5vw, 50px);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            cursor: pointer;
+            transition: opacity 0.8s ease, transform 0.3s ease;
+            letter-spacing: clamp(2px, 0.4vw, 4px);
+            text-shadow: 0 0 30px rgba(76, 175, 80, 0.5);
+            pointer-events: none;
+        }
+        .next-button.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .next-button:hover {
+            transform: translateX(-50%) scale(1.05);
+            background: rgba(0, 30, 8, 0.6);
+            border-color: rgba(76, 175, 80, 0.6);
+        }
+        .next-button.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* ===== المحتوى المركزي ===== */
+        #center-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 15;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            width: min(90%, 700px);
+            gap: clamp(15px, 2vh, 25px);
+        }
+        #center-content.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #center-content .main-title {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 900;
+            color: #e8f5e9;
+            text-shadow: 0 0 30px rgba(76, 175, 80, 0.3), 0 0 60px rgba(46, 125, 50, 0.15);
+            letter-spacing: clamp(4px, 1vw, 10px);
+            user-select: none;
+            text-align: center;
+            line-height: 1.2;
+            margin-bottom: clamp(5px, 1vh, 10px);
+        }
+
+        /* ===== شبكة المربعات الرئيسية ===== */
+        #bubbles-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: clamp(10px, 1.5vh, 18px);
+            width: 100%;
+            justify-items: center;
+            align-items: center;
+        }
+        .bubble {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            max-width: clamp(50px, 7vw, 80px);
+            border-radius: 16px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), rgba(76, 175, 80, 0.15));
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.1), inset 0 0 20px rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: clamp(0.5rem, 0.8vw, 0.8rem);
+            font-weight: 600;
+            text-align: center;
+            padding: 4px;
+            word-break: break-word;
+            line-height: 1.2;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            transform: scale(0);
+            opacity: 0;
+            user-select: none;
+            will-change: transform, opacity;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+        }
+        .bubble.show {
+            transform: scale(1);
+            opacity: 1;
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+        }
+        .bubble:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.4);
+            border-color: rgba(76, 175, 80, 0.6);
+        }
+        .bubble.pop {
+            transform: scale(0) rotate(10deg);
+            opacity: 0;
+            transition: transform 0.35s ease, opacity 0.35s ease;
+            pointer-events: none;
+        }
+        .bubble.respawn {
+            animation: respawnPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes respawnPop {
+            0% {
+                transform: scale(0) rotate(-8deg);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #bubbles-container {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+            }
+            .bubble {
+                max-width: clamp(45px, 8vw, 60px);
+                border-radius: 12px;
+                font-size: clamp(0.45rem, 0.9vw, 0.65rem);
+            }
+            #center-content .main-title {
+                font-size: clamp(2rem, 6vw, 3.5rem);
+            }
+        }
+        @media (max-width: 500px) {
+            #bubbles-container {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            .bubble {
+                max-width: clamp(40px, 10vw, 55px);
+                border-radius: 10px;
+                font-size: clamp(0.4rem, 1vw, 0.55rem);
+                border-width: 1.5px;
+            }
+            #center-content .main-title {
+                font-size: clamp(1.8rem, 5vw, 2.8rem);
+            }
+        }
+        @media (max-width: 360px) {
+            #bubbles-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+            .bubble {
+                max-width: clamp(35px, 12vw, 50px);
+                border-radius: 8px;
+                font-size: 0.4rem;
+            }
+            #center-content .main-title {
+                font-size: clamp(1.5rem, 4vw, 2.2rem);
+            }
+        }
+        @media (min-width: 1200px) {
+            #bubbles-container {
+                gap: 20px;
+            }
+            .bubble {
+                max-width: 90px;
+                font-size: 0.95rem;
+                border-radius: 20px;
+            }
+            #center-content .main-title {
+                font-size: 5rem;
+            }
+        }
+
+        /* ===== نافذة التنقل ===== */
+        #modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 30;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        #modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #modal-box {
+            background: rgba(10, 30, 15, 0.92);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(76, 175, 80, 0.5);
+            border-radius: clamp(24px, 4vw, 40px);
+            padding: clamp(25px, 4vh, 40px) clamp(20px, 3vw, 35px);
+            max-width: min(92%, 700px);
+            width: 100%;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(76, 175, 80, 0.15);
+            transform: scale(0.8) translateY(30px);
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.5s ease;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        #modal-overlay.active #modal-box {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        #modal-box .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: clamp(1.8rem, 3vw, 2.8rem);
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.6);
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease;
+            line-height: 1;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+        #modal-box .close-btn:hover {
+            color: #ff6b6b;
+            transform: rotate(90deg);
+        }
+
+        #modal-box .breadcrumb {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: clamp(0.85rem, 1.2vw, 1.1rem);
+            color: rgba(255, 255, 255, 0.5);
+            align-items: center;
+        }
+        #modal-box .breadcrumb .crumb {
+            cursor: pointer;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        #modal-box .breadcrumb .crumb:hover {
+            color: #a5d6a7;
+        }
+        #modal-box .breadcrumb .crumb.current {
+            color: #e8f5e9;
+            font-weight: 600;
+            cursor: default;
+        }
+        #modal-box .breadcrumb .sep {
+            color: rgba(255, 255, 255, 0.2);
+            font-weight: 300;
+        }
+
+        #modal-box .modal-title {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-weight: 700;
+            color: #e8f5e9;
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+        #modal-box .modal-divider {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #66bb6a, transparent);
+            margin: 6px auto 16px;
+            border-radius: 4px;
+        }
+
+        .sub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 14px;
+            margin-top: 6px;
+        }
+        .sub-item {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 16px;
+            padding: 14px 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .sub-item:hover {
+            transform: scale(1.05);
+            background: rgba(76, 175, 80, 0.15);
+            box-shadow: 0 0 25px rgba(76, 175, 80, 0.2);
+        }
+        .sub-item .sub-icon {
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            display: block;
+        }
+        .sub-item .sub-name {
+            font-size: clamp(0.55rem, 0.9vw, 0.8rem);
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        /* ===== نافذة التفاصيل ===== */
+        #detail-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(12px);
+            z-index: 40;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        #detail-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #detail-box {
+            background: rgba(10, 30, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(76, 175, 80, 0.6);
+            border-radius: clamp(24px, 4vw, 40px);
+            padding: clamp(30px, 5vh, 50px) clamp(25px, 4vw, 45px);
+            max-width: min(92%, 500px);
+            width: 100%;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9);
+            transform: scale(0.8) translateY(20px);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.4s ease;
+            position: relative;
+        }
+        #detail-overlay.active #detail-box {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+        #detail-box .close-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            font-size: clamp(1.8rem, 3vw, 2.8rem);
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.6);
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease;
+            line-height: 1;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+        #detail-box .close-btn:hover {
+            color: #ff6b6b;
+            transform: rotate(90deg);
+        }
+        #detail-box .detail-icon {
+            font-size: clamp(3rem, 6vw, 5rem);
+            text-align: center;
+            display: block;
+            margin-bottom: 6px;
+        }
+        #detail-box .detail-title {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-weight: 700;
+            color: #e8f5e9;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        #detail-box .detail-desc {
+            font-size: clamp(0.95rem, 1.5vw, 1.2rem);
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+            text-align: right;
+        }
+        #detail-box .modal-divider {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #66bb6a, transparent);
+            margin: 8px auto 14px;
+            border-radius: 4px;
+        }
+
+        /* ===== شريط الأخبار ===== */
+        #news-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: clamp(40px, 6vh, 55px);
+            background: rgba(0, 20, 5, 0.5);
+            backdrop-filter: blur(8px);
+            border-top: 1px solid rgba(76, 175, 80, 0.25);
+            z-index: 8;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            pointer-events: none;
+        }
+        #news-bar.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #news-bar .label {
+            flex-shrink: 0;
+            padding: 0 clamp(12px, 2vw, 20px);
+            font-size: clamp(0.7rem, 1.2vw, 1rem);
+            font-weight: 700;
+            color: #a5d6a7;
+            text-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+            letter-spacing: clamp(1px, 0.2vw, 2px);
+            background: rgba(0, 0, 0, 0.3);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            border-right: 1px solid rgba(76, 175, 80, 0.2);
+            white-space: nowrap;
+        }
+        #news-bar .ticker {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            height: 100%;
+        }
+        #news-bar .ticker-content {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            animation: tickerScroll 25s linear infinite;
+            white-space: nowrap;
+        }
+        #news-bar .ticker-content span {
+            padding: 0 clamp(20px, 3vw, 50px);
+            font-size: clamp(0.7rem, 1vw, 1rem);
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 1px;
+            font-weight: 400;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #news-bar .ticker-content span::before {
+            content: "•";
+            color: #66bb6a;
+            font-size: clamp(1rem, 1.5vw, 1.5rem);
+            margin-right: 6px;
+        }
+        @keyframes tickerScroll {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+        @media (max-width: 480px) {
+            #news-bar .ticker-content {
+                animation-duration: 18s;
+            }
+            #news-bar .ticker-content span {
+                padding: 0 15px;
+            }
+        }
+
+        .credit {
+            position: fixed;
+            bottom: clamp(55px, 8vh, 65px);
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.04);
+            font-size: clamp(10px, 1vw, 14px);
+            letter-spacing: clamp(2px, 0.4vw, 6px);
+            z-index: 2;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* ===== كانفاس الفعاليات ===== */
+        #effect-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 25;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        #effect-canvas.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ===== رسالة "تم الاشتراك" المنبثقة ===== */
+        .subscribe-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 26;
+            text-align: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .subscribe-popup.active {
+            animation: popupAppear 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            pointer-events: none;
+        }
+        @keyframes popupAppear {
+            0% {
+                transform: translate(-50%, -50%) scale(0) rotate(-10deg);
+                opacity: 0;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+        .subscribe-popup .popup-icon {
+            font-size: clamp(4rem, 10vw, 7rem);
+            animation: floatIcon 2s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 40px rgba(76, 175, 80, 0.5));
+        }
+        @keyframes floatIcon {
+            0% {
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                transform: translateY(-12px) scale(1.05);
+            }
+        }
+        .subscribe-popup .popup-title {
+            font-size: clamp(2.5rem, 7vw, 5rem);
+            font-weight: 900;
+            color: #e8f5e9;
+            text-shadow: 0 0 40px rgba(76, 175, 80, 0.5), 0 0 80px rgba(46, 125, 50, 0.3);
+            letter-spacing: clamp(4px, 1vw, 8px);
+        }
+        .subscribe-popup .popup-sub {
+            font-size: clamp(1.2rem, 2.5vw, 2rem);
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+            margin-top: 2px;
+            letter-spacing: 2px;
+        }
+        .subscribe-popup .popup-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(76, 175, 80, 0.15), transparent 70%);
+            border-radius: 50%;
+            z-index: -1;
+            animation: pulseGlowBig 2s ease-in-out infinite alternate;
+        }
+        @keyframes pulseGlowBig {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.4);
+                opacity: 1;
+            }
+        }
+
+        /* ===== شرارات صغيرة ===== */
+        .sparkle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 27;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fff, #a5d6a7);
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+            animation: sparkleFade 1.2s ease forwards;
+        }
+        @keyframes sparkleFade {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5) rotate(180deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== النجوم ===== -->
+    <div id="stars-container"></div>
+
+    <!-- ===== شاشة "أهلاً" ===== -->
+    <div id="splash-screen"><h1>أهلاً</h1></div>
+
+    <!-- ===== الصفحة الرئيسية ===== -->
+    <div id="main-page">
+        <div class="vireon-strip" id="vireonStrip"><h1>Vireon</h1></div>
+        <h1 id="vireonName">Vireon</h1>
+
+        <div class="subscribe-container" id="subscribeContainer">
+            <div class="subscribe-box" id="subscribeBox">
+                <span class="icon">📺</span>
+                <h2>اشترك في قناة <span class="highlight">Vireon Studio</span></h2>
+                <p>انقر هنا للانتقال إلى القناة والاشتراك</p>
+                <div class="sub-text">سيتم فتح الرابط تلقائياً، انتظر 10 ثوانٍ لظهور "التالي"</div>
+                <!-- محتوى ما بعد الاشتراك -->
+                <div class="subscribed-content" id="subscribedContent">
+                    <div class="big-check">✅</div>
+                    <div class="thanks-text">تم الاشتراك</div>
+                    <div class="thanks-sub">شكراً لك! 🎉</div>
+                    <div class="countdown-wrap">
+                        <span class="timer-label">الانتظار</span>
+                        <span class="timer" id="countdownTimer">10</span>
+                        <span class="timer-label">ث</span>
+                        <div class="progress-ring">
+                            <div class="ring-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="next-button" id="nextButton">التالي ➜</div>
+    </div>
+
+    <!-- ===== المحتوى المركزي ===== -->
+    <div id="center-content">
+        <div class="main-title">الرئيسية</div>
+        <div id="bubbles-container"></div>
+    </div>
+
+    <!-- ===== كانفاس الفعاليات ===== -->
+    <canvas id="effect-canvas"></canvas>
+
+    <!-- ===== رسالة الاشتراك المنبثقة ===== -->
+    <div class="subscribe-popup" id="subscribePopup">
+        <div class="popup-glow"></div>
+        <div class="popup-icon">✅</div>
+        <div class="popup-title">تم الاشتراك</div>
+        <div class="popup-sub">شكراً لك! 🎉</div>
+    </div>
+
+    <!-- ===== نافذة التنقل ===== -->
+    <div id="modal-overlay">
+        <div id="modal-box">
+            <button class="close-btn" id="modalClose">✕</button>
+            <div class="breadcrumb" id="breadcrumb"></div>
+            <div class="modal-title" id="modalTitle">العنوان</div>
+            <div class="modal-divider"></div>
+            <div id="subItemsContainer"></div>
+        </div>
+    </div>
+
+    <!-- ===== نافذة التفاصيل ===== -->
+    <div id="detail-overlay">
+        <div id="detail-box">
+            <button class="close-btn" id="detailClose">✕</button>
+            <span class="detail-icon" id="detailIcon">📘</span>
+            <div class="detail-title" id="detailTitle">العنوان</div>
+            <div class="modal-divider"></div>
+            <div class="detail-desc" id="detailDesc">المحتوى التفصيلي</div>
+        </div>
+    </div>
+
+    <!-- ===== شريط الأخبار ===== -->
+    <div id="news-bar">
+        <div class="label">📰 الأحداث الأخيرة</div>
+        <div class="ticker">
+            <div class="ticker-content">
+                <span>مرحباً بكم في الموقع الجديد</span>
+                <span>قناة Vireon Studio تقدم محتوى مميز</span>
+                <span>تابعونا للمزيد من الإبداع</span>
+                <span>نعمل على تطوير الموقع باستمرار</span>
+                <span>شكراً لدعمكم</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="credit">✦ ✦ ✦</div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            // 1. النجوم
+            // ============================================================
+            const container = document.getElementById('stars-container');
+            const frag = document.createDocumentFragment();
+            for (let i = 0; i < 200; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = 1.5 + Math.random() * 3;
+                star.style.setProperty('--s', size + 'px');
+                star.style.setProperty('--t', Math.random() * 100 + '%');
+                star.style.setProperty('--l', Math.random() * 100 + '%');
+                star.style.setProperty('--d', (1.2 + Math.random() * 3) + 's');
+                star.style.animationDelay = Math.random() * 4 + 's';
+                frag.appendChild(star);
+            }
+            container.appendChild(frag);
+
+            // ============================================================
+            // 2. عناصر الواجهة
+            // ============================================================
+            const splash = document.getElementById('splash-screen');
+            const mainPage = document.getElementById('main-page');
+            const strip = document.getElementById('vireonStrip');
+            const vireonName = document.getElementById('vireonName');
+            const subscribeContainer = document.getElementById('subscribeContainer');
+            const subscribeBox = document.getElementById('subscribeBox');
+            const subscribedContent = document.getElementById('subscribedContent');
+            const countdownTimer = document.getElementById('countdownTimer');
+            const nextButton = document.getElementById('nextButton');
+            const centerContent = document.getElementById('center-content');
+            const bubblesContainer = document.getElementById('bubbles-container');
+            const newsBar = document.getElementById('news-bar');
+
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalClose = document.getElementById('modalClose');
+            const modalTitle = document.getElementById('modalTitle');
+            const subItemsContainer = document.getElementById('subItemsContainer');
+            const breadcrumb = document.getElementById('breadcrumb');
+
+            const detailOverlay = document.getElementById('detail-overlay');
+            const detailClose = document.getElementById('detailClose');
+            const detailIcon = document.getElementById('detailIcon');
+            const detailTitle = document.getElementById('detailTitle');
+            const detailDesc = document.getElementById('detailDesc');
+
+            const canvas = document.getElementById('effect-canvas');
+            const ctx = canvas.getContext('2d');
+            const popup = document.getElementById('subscribePopup');
+
+            let isSubscribed = false;
+            let nextVisible = false;
+            let isAnimating = false;
+            let countdownValue = 10;
+            let countdownInterval = null;
+            const CHANNEL_URL = 'https://www.youtube.com/@VIREON10';
+
+            // ===== حجم الكانفاس =====
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // ============================================================
+            // 3. نظام الجسيمات
+            // ============================================================
+            let particles = [];
+            let animationId = null;
+            let isEffectActive = false;
+
+            class Particle {
+                constructor(x, y, vx, vy, size, color, life, type, gravity) {
+                    this.x = x;
+                    this.y = y;
+                    this.vx = vx;
+                    this.vy = vy;
+                    this.size = size || 4;
+                    this.color = color || '#66bb6a';
+                    this.life = life || 60;
+                    this.maxLife = this.life;
+                    this.type = type || 'circle';
+                    this.gravity = gravity || 0.05;
+                    this.friction = 0.99;
+                    this.rotation = Math.random() * Math.PI * 2;
+                    this.rotationSpeed = (Math.random() - 0.5) * 0.15;
+                    this.alpha = 1;
+                    // للكونفيتي
+                    this.width = size * (0.6 + Math.random() * 0.8);
+                    this.height = size * (0.2 + Math.random() * 0.4);
+                }
+
+                update() {
+                    this.vx *= this.friction;
+                    this.vy *= this.friction;
+                    this.vy += this.gravity;
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.life--;
+                    this.rotation += this.rotationSpeed;
+                    this.alpha = Math.max(0, this.life / this.maxLife);
+                    return this.life > 0 && this.alpha > 0.01;
+                }
+
+                draw(ctx) {
+                    const a = this.alpha;
+                    ctx.globalAlpha = a;
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.rotation);
+
+                    if (this.type === 'confetti') {
+                        ctx.fillStyle = this.color;
+                        ctx.shadowColor = this.color;
+                        ctx.shadowBlur = 6;
+                        ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
+                        ctx.shadowBlur = 0;
+                    } else if (this.type === 'sparkle') {
+                        const s = this.size * (0.3 + 0.7 * a);
+                        ctx.fillStyle = this.color;
+                        ctx.shadowColor = '#fff';
+                        ctx.shadowBlur = 15;
+                        // نجمة 4 أطراف
+                        ctx.beginPath();
+                        for (let i = 0; i < 8; i++) {
+                            const angle = (i / 8) * Math.PI * 2;
+                            const r = i % 2 === 0 ? s : s * 0.3;
+                            if (i === 0) ctx.moveTo(r * Math.cos(angle), r * Math.sin(angle));
+                            else ctx.lineTo(r * Math.cos(angle), r * Math.sin(angle));
+                        }
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                    } else {
+                        // دائرة عادية
+                        const s = this.size * (0.2 + 0.8 * a);
+                        ctx.beginPath();
+                        ctx.arc(0, 0, s, 0, Math.PI * 2);
+                        ctx.fillStyle = this.color;
+                        ctx.shadowColor = this.color;
+                        ctx.shadowBlur = 10;
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+                    }
+
+                    ctx.restore();
+                    ctx.globalAlpha = 1;
+                }
+            }
+
+            // ===== إنشاء انفجار =====
+            function createExplosion(cx, cy, count, colors) {
+                const col = colors || ['#66bb6a', '#a5d6a7', '#c8e6c9', '#fff', '#ffd54f', '#ff8a65', '#4dd0e1'];
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 2 + Math.random() * 8;
+                    const size = 3 + Math.random() * 8;
+                    const color = col[Math.floor(Math.random() * col.length)];
+                    const life = 40 + Math.random() * 60;
+                    const type = Math.random() > 0.7 ? 'sparkle' : 'circle';
+                    const p = new Particle(
+                        cx + (Math.random() - 0.5) * 20,
+                        cy + (Math.random() - 0.5) * 20,
+                        Math.cos(angle) * speed * (0.6 + Math.random() * 0.8),
+                        Math.sin(angle) * speed * (0.6 + Math.random() * 0.8) - 1,
+                        size,
+                        color,
+                        life,
+                        type,
+                        0.04 + Math.random() * 0.04
+                    );
+                    p.friction = 0.97 + Math.random() * 0.02;
+                    particles.push(p);
+                }
+            }
+
+            // ===== إنشاء كونفيتي =====
+            function createConfetti(count, colors) {
+                const col = colors || ['#66bb6a', '#a5d6a7', '#ffd54f', '#ff8a65', '#4dd0e1', '#fff', '#ce93d8', '#81d4fa'];
+                for (let i = 0; i < count; i++) {
+                    const x = Math.random() * canvas.width;
+                    const y = -20 - Math.random() * 100;
+                    const vx = (Math.random() - 0.5) * 3;
+                    const vy = 1.5 + Math.random() * 3;
+                    const size = 4 + Math.random() * 8;
+                    const color = col[Math.floor(Math.random() * col.length)];
+                    const life = 80 + Math.random() * 60;
+                    const p = new Particle(x, y, vx, vy, size, color, life, 'confetti', 0.03 + Math.random() * 0.03);
+                    p.friction = 0.995;
+                    p.rotationSpeed = (Math.random() - 0.5) * 0.3;
+                    p.width = size * (0.6 + Math.random() * 0.8);
+                    p.height = size * (0.15 + Math.random() * 0.3);
+                    particles.push(p);
+                }
+            }
+
+            // ===== إنشاء شرارات =====
+            function createSparkles(cx, cy, count) {
+                const col = ['#fff', '#a5d6a7', '#ffd54f', '#4dd0e1'];
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 30 + Math.random() * 120;
+                    const x = cx + Math.cos(angle) * dist;
+                    const y = cy + Math.sin(angle) * dist;
+                    const size = 2 + Math.random() * 5;
+                    const color = col[Math.floor(Math.random() * col.length)];
+                    const life = 20 + Math.random() * 30;
+                    const p = new Particle(x, y, (Math.random() - 0.5) * 1, (Math.random() - 0.5) * 1 - 0.5, size, color, life,
+                        'sparkle', 0.01);
+                    p.friction = 0.96;
+                    particles.push(p);
+                }
+            }
+
+            // ===== رسم وتحديث الجسيمات =====
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const alive = [];
+                for (const p of particles) {
+                    if (p.update()) {
+                        p.draw(ctx);
+                        alive.push(p);
+                    }
+                }
+                particles = alive;
+
+                if (particles.length > 0) {
+                    animationId = requestAnimationFrame(animateParticles);
+                } else {
+                    isEffectActive = false;
+                    canvas.classList.remove('active');
+                    if (animationId) {
+                        cancelAnimationFrame(animationId);
+                        animationId = null;
+                    }
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+
+            function startEffect(cx, cy) {
+                // تنظيف الجسيمات السابقة
+                particles = [];
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+
+                // إنشاء الانفجار
+                createExplosion(cx, cy, 200);
+                // كونفيتي
+                createConfetti(120);
+                // شرارات إضافية
+                createSparkles(cx, cy, 30);
+                // دفعة ثانية من الكونفيتي بعد تأخير قصير
+                setTimeout(() => {
+                    createConfetti(60);
+                }, 400);
+                setTimeout(() => {
+                    createSparkles(cx + (Math.random() - 0.5) * 100, cy + (Math.random() - 0.5) * 100, 20);
+                }, 600);
+
+                isEffectActive = true;
+                canvas.classList.add('active');
+                if (animationId) cancelAnimationFrame(animationId);
+                animateParticles();
+            }
+
+            // ============================================================
+            // 4. التسلسل الزمني للصفحة الرئيسية
+            // ============================================================
+            setTimeout(() => {
+                splash.classList.add('hidden');
+                setTimeout(() => {
+                    mainPage.classList.add('visible');
+                    setTimeout(() => {
+                        strip.classList.add('moved-up');
+                        setTimeout(() => {
+                            subscribeContainer.classList.add('visible');
+                        }, 1200);
+                    }, 2000);
+                }, 1300);
+            }, 3000);
+
+            // ============================================================
+            // 5. الاشتراك - الانفجار والتأثيرات
+            // ============================================================
+            subscribeBox.addEventListener('click', function(e) {
+                if (isSubscribed || isAnimating) return;
+
+                // فتح رابط القناة
+                window.open(CHANNEL_URL, '_blank');
+
+                isSubscribed = true;
+                isAnimating = true;
+
+                // الحصول على موضع المربع للانفجار
+                const rect = this.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+
+                // تفعيل الانفجار
+                startEffect(cx, cy);
+
+                // إضافة تأثير الاهتزاز للمربع ثم الاختفاء
+                this.classList.add('exploding');
+
+                // إظهار رسالة "تم الاشتراك" المنبثقة
+                popup.classList.add('active');
+
+                // بعد 0.6 ثانية، تبديل حالة المربع إلى "تم الاشتراك"
+                setTimeout(() => {
+                    this.classList.remove('exploding');
+                    this.classList.add('subscribed');
+                    // إخفاء الرسالة المنبثقة بعد ظهورها
+                    setTimeout(() => {
+                        popup.classList.remove('active');
+                    }, 2000);
+                }, 600);
+
+                // بدء العد التنازلي
+                countdownValue = 10;
+                countdownTimer.textContent = countdownValue;
+                if (countdownInterval) clearInterval(countdownInterval);
+                countdownInterval = setInterval(() => {
+                    countdownValue--;
+                    countdownTimer.textContent = countdownValue;
+                    if (countdownValue <= 0) {
+                        clearInterval(countdownInterval);
+                        countdownInterval = null;
+                        countdownTimer.textContent = '0';
+                        // إظهار زر "التالي"
+                        nextButton.classList.add('visible');
+                        nextVisible = true;
+                        isAnimating = false;
+                        // تحديث نص العد
+                        const wrap = subscribedContent.querySelector('.countdown-wrap');
+                        if (wrap) {
+                            wrap.innerHTML =
+                                '<span style="color:#a5d6a7;font-weight:600;font-size:clamp(0.9rem,1.2vw,1.1rem);">✅ جاهز!</span>';
+                        }
+                    }
+                }, 1000);
+
+                // إضافة شرارات صغيرة متفرقة
+                for (let i = 0; i < 12; i++) {
+                    setTimeout(() => {
+                        const x = Math.random() * window.innerWidth;
+                        const y = Math.random() * window.innerHeight;
+                        createSparkles(x, y, 5);
+                    }, 300 + i * 200);
+                }
+
+                // إضافة موجة ثانية من الكونفيتي
+                setTimeout(() => {
+                    createConfetti(80, ['#66bb6a', '#ffd54f', '#a5d6a7', '#fff', '#4dd0e1', '#ff8a65']);
+                }, 1200);
+                setTimeout(() => {
+                    createConfetti(50, ['#ffd54f', '#fff', '#81d4fa']);
+                }, 2200);
+            });
+
+            // ============================================================
+            // 6. زر "التالي"
+            // ============================================================
+            nextButton.addEventListener('click', function() {
+                if (!nextVisible || isAnimating) return;
+                isAnimating = true;
+                this.classList.add('hide');
+                setTimeout(() => {
+                    subscribeContainer.classList.add('hide');
+                    setTimeout(() => {
+                        strip.classList.add('hide');
+                        vireonName.classList.add('show', 'center');
+                        setTimeout(() => {
+                            vireonName.classList.remove('center');
+                            vireonName.classList.add('top-left');
+                            setTimeout(() => {
+                                createBubbles();
+                                centerContent.classList.add('active');
+                                newsBar.classList.add('active');
+                                isAnimating = false;
+                            }, 1200);
+                        }, 2000);
+                    }, 800);
+                }, 800);
+            });
+
+            // ============================================================
+            // 7. البيانات الكاملة (نفس الهيكل الأصلي)
+            // ============================================================
+            function createMokataat(names) {
+                return names.map(name => ({
+                    name: name,
+                    icon: '📚',
+                    children: [
+                        { name: 'الدرس الأول', icon: '📖' },
+                        { name: 'الدرس الثاني', icon: '📖' },
+                        { name: 'الدرس الثالث', icon: '📖' },
+                        { name: 'نشاط تطبيقي', icon: '📝' },
+                        { name: 'تقويم', icon: '🎯' }
+                    ]
+                }));
+            }
+
+            function createFusool() {
+                const names = ['المقطع الأول', 'المقطع الثاني', 'المقطع الثالث', 'المقطع الرابع'];
+                const mokataat = createMokataat(names);
+                return [
+                    { name: 'الفصل الأول', icon: '🍂', children: mokataat },
+                    { name: 'الفصل الثاني', icon: '❄️', children: mokataat.map(m => ({ ...m })) },
+                    { name: 'الفصل الثالث', icon: '🌸', children: mokataat.map(m => ({ ...m })) }
+                ];
+            }
+
+            // المواد الدراسية (الابتدائي)
+            const subjectsPrimary = {
+                name: 'المواد الدراسية',
+                icon: '📚',
+                children: [{
+                    name: 'اللغة العربية',
+                    icon: '🔤',
+                    children: [
+                        { name: 'فهم المنطوق', icon: '🗣️', children: createFusool() },
+                        { name: 'فهم المكتوب', icon: '📖', children: createFusool() },
+                        { name: 'التعبير الشفهي', icon: '💬', children: createFusool() },
+                        { name: 'الكتابة', icon: '✍️', children: createFusool() },
+                        { name: 'التعبير الكتابي', icon: '📝', children: createFusool() }
+                    ]
+                }, {
+                    name: 'الرياضيات',
+                    icon: '🔢',
+                    children: [
+                        { name: 'الأعداد والحساب', icon: '🔢', children: createFusool() },
+                        { name: 'الهندسة', icon: '📐', children: createFusool() },
+                        { name: 'القياس', icon: '📏', children: createFusool() },
+                        { name: 'حل المشكلات', icon: '🧩', children: createFusool() }
+                    ]
+                }, {
+                    name: 'التربية الإسلامية',
+                    icon: '🕌',
+                    children: [
+                        { name: 'القرآن الكريم', icon: '📖', children: createFusool() },
+                        { name: 'العقيدة', icon: '☝️', children: createFusool() },
+                        { name: 'العبادات', icon: '🤲', children: createFusool() },
+                        { name: 'الأخلاق والآداب', icon: '❤️', children: createFusool() },
+                        { name: 'السيرة النبوية', icon: '🌙', children: createFusool() }
+                    ]
+                }, {
+                    name: 'التربية المدنية',
+                    icon: '🏛️',
+                    children: [
+                        { name: 'الأسرة', icon: '👨‍👩‍👧', children: createFusool() },
+                        { name: 'المدرسة', icon: '🏫', children: createFusool() },
+                        { name: 'المجتمع', icon: '🤝', children: createFusool() },
+                        { name: 'الحقوق والواجبات', icon: '⚖️', children: createFusool() },
+                        { name: 'السلامة', icon: '🛡️', children: createFusool() }
+                    ]
+                }, {
+                    name: 'التربية العلمية والتكنولوجية',
+                    icon: '🌱',
+                    children: [
+                        { name: 'الإنسان', icon: '👦', children: createFusool() },
+                        { name: 'النبات', icon: '🌳', children: createFusool() },
+                        { name: 'الحيوان', icon: '🐾', children: createFusool() },
+                        { name: 'الماء', icon: '💧', children: createFusool() },
+                        { name: 'البيئة', icon: '🌍', children: createFusool() },
+                        { name: 'التكنولوجيا', icon: '🔧', children: createFusool() }
+                    ]
+                }, {
+                    name: 'التربية الفنية',
+                    icon: '🎨',
+                    children: [
+                        { name: 'الرسم', icon: '🖌️', children: createFusool() },
+                        { name: 'التلوين', icon: '🖍️', children: createFusool() },
+                        { name: 'القص واللصق', icon: '✂️', children: createFusool() },
+                        { name: 'التشكيل', icon: '🧱', children: createFusool() },
+                        { name: 'الأشغال اليدوية', icon: '🧶', children: createFusool() }
+                    ]
+                }, {
+                    name: 'التربية الموسيقية',
+                    icon: '🎵',
+                    children: [
+                        { name: 'الأناشيد', icon: '🎤', children: createFusool() },
+                        { name: 'الغناء', icon: '🎶', children: createFusool() },
+                        { name: 'الإيقاع', icon: '🥁', children: createFusool() },
+                        { name: 'الاستماع', icon: '👂', children: createFusool() }
+                    ]
+                }, {
+                    name: 'التربية البدنية والرياضية',
+                    icon: '🏃',
+                    children: [
+                        { name: 'الجري', icon: '🏃', children: createFusool() },
+                        { name: 'القفز', icon: '🦘', children: createFusool() },
+                        { name: 'الرمي', icon: '🎯', children: createFusool() },
+                        { name: 'التوازن', icon: '⚖️', children: createFusool() },
+                        { name: 'الحركات الأساسية', icon: '🤸', children: createFusool() },
+                        { name: 'الألعاب الجماعية', icon: '👥', children: createFusool() }
+                    ]
+                }]
+            };
+
+            // المواد الدراسية (المتوسط)
+            const subjectsMiddle = {
+                name: 'المواد الدراسية',
+                icon: '📚',
+                children: [
+                    ...subjectsPrimary.children.filter(m =>
+                        ['اللغة العربية', 'الرياضيات', 'التربية الإسلامية', 'التربية المدنية', 'التربية الفنية',
+                            'التربية البدنية والرياضية'
+                        ].includes(m.name)
+                    ).map(m => ({ ...m })),
+                    {
+                        name: 'العلوم الفيزيائية والتكنولوجيا',
+                        icon: '⚛️',
+                        children: [
+                            { name: 'المادة وخصائصها', icon: '🧪', children: createFusool() },
+                            { name: 'الحركة والقوى', icon: '🏋️', children: createFusool() },
+                            { name: 'الطاقة', icon: '⚡', children: createFusool() },
+                            { name: 'التكنولوجيا', icon: '💻', children: createFusool() }
+                        ]
+                    }, {
+                        name: 'العلوم الطبيعية والحياة',
+                        icon: '🌿',
+                        children: [
+                            { name: 'الخلية', icon: '🧬', children: createFusool() },
+                            { name: 'التغذية', icon: '🍽️', children: createFusool() },
+                            { name: 'الجهاز التنفسي', icon: '🫁', children: createFusool() },
+                            { name: 'الجهاز الهضمي', icon: '🦴', children: createFusool() },
+                            { name: 'البيئة', icon: '🌍', children: createFusool() }
+                        ]
+                    }, {
+                        name: 'التاريخ والجغرافيا',
+                        icon: '🌍',
+                        children: [
+                            { name: 'التاريخ القديم', icon: '🏛️', children: createFusool() },
+                            { name: 'التاريخ الوسيط', icon: '⚔️', children: createFusool() },
+                            { name: 'التاريخ الحديث', icon: '🕊️', children: createFusool() },
+                            { name: 'الجغرافيا الطبيعية', icon: '🗺️', children: createFusool() },
+                            { name: 'الجغرافيا البشرية', icon: '👥', children: createFusool() }
+                        ]
+                    }, {
+                        name: 'اللغة الإنجليزية',
+                        icon: '🇬🇧',
+                        children: [
+                            { name: 'المفردات', icon: '📚', children: createFusool() },
+                            { name: 'القواعد', icon: '📝', children: createFusool() },
+                            { name: 'القراءة', icon: '📖', children: createFusool() },
+                            { name: 'الكتابة', icon: '✍️', children: createFusool() },
+                            { name: 'المحادثة', icon: '💬', children: createFusool() }
+                        ]
+                    }, {
+                        name: 'اللغة الفرنسية',
+                        icon: '🇫🇷',
+                        children: [
+                            { name: 'المفردات', icon: '📚', children: createFusool() },
+                            { name: 'القواعد', icon: '📝', children: createFusool() },
+                            { name: 'القراءة', icon: '📖', children: createFusool() },
+                            { name: 'الكتابة', icon: '✍️', children: createFusool() },
+                            { name: 'المحادثة', icon: '💬', children: createFusool() }
+                        ]
+                    }
+                ]
+            };
+
+            // المواد الدراسية (الثانوي)
+            const subjectsSecondary = {
+                name: 'المواد الدراسية',
+                icon: '📚',
+                children: [{
+                    name: 'اللغة العربية',
+                    icon: '🔤',
+                    children: [
+                        { name: 'النحو والصرف', icon: '📝', children: createFusool() },
+                        { name: 'البلاغة', icon: '🎨', children: createFusool() },
+                        { name: 'الأدب', icon: '📖', children: createFusool() },
+                        { name: 'التعبير والإنشاء', icon: '✍️', children: createFusool() },
+                        { name: 'المطالعة', icon: '👁️', children: createFusool() }
+                    ]
+                }, {
+                    name: 'الرياضيات',
+                    icon: '🔢',
+                    children: [
+                        { name: 'الجبر', icon: '➗', children: createFusool() },
+                        { name: 'الهندسة', icon: '📐', children: createFusool() },
+                        { name: 'التحليل', icon: '📊', children: createFusool() },
+                        { name: 'الإحصاء والاحتمالات', icon: '🎲', children: createFusool() },
+                        { name: 'المسائل', icon: '🧩', children: createFusool() }
+                    ]
+                }, {
+                    name: 'الفيزياء والكيمياء',
+                    icon: '⚛️',
+                    children: [
+                        { name: 'الميكانيك', icon: '🔧', children: createFusool() },
+                        { name: 'الكهرباء', icon: '⚡', children: createFusool() },
+                        { name: 'المادة', icon: '🧪', children: createFusool() },
+                        { name: 'الطاقة', icon: '🔥', children: createFusool() },
+                        { name: 'الكيمياء العضوية', icon: '🧬', children: createFusool() },
+                        { name: 'الكيمياء اللاعضوية', icon: '🔬', children: createFusool() }
+                    ]
+                }, {
+                    name: 'العلوم الطبيعية',
+                    icon: '🌿',
+                    children: [
+                        { name: 'الخلية', icon: '🧬', children: createFusool() },
+                        { name: 'الوراثة', icon: '🧫', children: createFusool() },
+                        { name: 'التغذية', icon: '🍎', children: createFusool() },
+                        { name: 'الجهاز العصبي', icon: '🧠', children: createFusool() },
+                        { name: 'الجهاز الهرموني', icon: '💉', children: createFusool() },
+                        { name: 'البيئة', icon: '🌍', children: createFusool() }
+                    ]
+                }, {
+                    name: 'التاريخ والجغرافيا',
+                    icon: '🌍',
+                    children: [
+                        { name: 'التاريخ الحديث', icon: '📜', children: createFusool() },
+                        { name: 'التاريخ المعاصر', icon: '🕊️', children: createFusool() },
+                        { name: 'الجغرافيا الطبيعية', icon: '🗺️', children: createFusool() },
+                        { name: 'الجغرافيا البشرية', icon: '👥', children: createFusool() },
+                        { name: 'الخرائط', icon: '🗺️', children: createFusool() }
+                    ]
+                }, {
+                    name: 'الفلسفة',
+                    icon: '🧠',
+                    children: [
+                        { name: 'مبادئ الفلسفة', icon: '📚', children: createFusool() },
+                        { name: 'المنطق', icon: '🔍', children: createFusool() },
+                        { name: 'الأخلاق', icon: '❤️', children: createFusool() },
+                        { name: 'الفلسفة السياسية', icon: '⚖️', children: createFusool() },
+                        { name: 'الفلسفة العلمية', icon: '🔬', children: createFusool() }
+                    ]
+                }, {
+                    name: 'التربية الإسلامية',
+                    icon: '🕌',
+                    children: [
+                        { name: 'القرآن الكريم', icon: '📖', children: createFusool() },
+                        { name: 'العقيدة', icon: '☝️', children: createFusool() },
+                        { name: 'الحديث النبوي', icon: '📜', children: createFusool() },
+                        { name: 'الفقه', icon: '⚖️', children: createFusool() },
+                        { name: 'السيرة النبوية', icon: '🌙', children: createFusool() }
+                    ]
+                }, {
+                    name: 'اللغة الإنجليزية',
+                    icon: '🇬🇧',
+                    children: [
+                        { name: 'المفردات', icon: '📚', children: createFusool() },
+                        { name: 'القواعد', icon: '📝', children: createFusool() },
+                        { name: 'القراءة', icon: '📖', children: createFusool() },
+                        { name: 'الكتابة', icon: '✍️', children: createFusool() },
+                        { name: 'المحادثة', icon: '💬', children: createFusool() },
+                        { name: 'الترجمة', icon: '🔄', children: createFusool() }
+                    ]
+                }, {
+                    name: 'اللغة الفرنسية',
+                    icon: '🇫🇷',
+                    children: [
+                        { name: 'المفردات', icon: '📚', children: createFusool() },
+                        { name: 'القواعد', icon: '📝', children: createFusool() },
+                        { name: 'القراءة', icon: '📖', children: createFusool() },
+                        { name: 'الكتابة', icon: '✍️', children: createFusool() },
+                        { name: 'المحادثة', icon: '💬', children: createFusool() },
+                        { name: 'الترجمة', icon: '🔄', children: createFusool() }
+                    ]
+                }, {
+                    name: 'التربية البدنية والرياضية',
+                    icon: '🏃',
+                    children: [
+                        { name: 'الرياضات الفردية', icon: '🏋️', children: createFusool() },
+                        { name: 'الرياضات الجماعية', icon: '⚽', children: createFusool() },
+                        { name: 'النظرية الرياضية', icon: '📚', children: createFusool() }
+                    ]
+                }, {
+                    name: 'التربية المدنية',
+                    icon: '🏛️',
+                    children: [
+                        { name: 'الدولة والمؤسسات', icon: '🏛️', children: createFusool() },
+                        { name: 'المواطنة', icon: '🤝', children: createFusool() },
+                        { name: 'الحقوق والواجبات', icon: '⚖️', children: createFusool() },
+                        { name: 'الانتخابات', icon: '🗳️', children: createFusool() }
+                    ]
+                }]
+            };
+
+            function createBook(name, icon) {
+                return { name, icon, children: [{ name: 'الكتاب المدرسي', icon: '📕' }, { name: 'دفتر الأنشطة',
+                        icon: '📓' }, { name: 'دليل الأستاذ', icon: '👨‍🏫' }] };
+            }
+
+            const booksCommon = {
+                name: 'الكتب المدرسية',
+                icon: '📖',
+                children: [
+                    createBook('كتاب اللغة العربية', '🔤'),
+                    createBook('كتاب الرياضيات', '🔢'),
+                    createBook('كتاب الفيزياء والكيمياء', '⚛️'),
+                    createBook('كتاب العلوم الطبيعية', '🌿'),
+                    createBook('كتاب التاريخ والجغرافيا', '🌍'),
+                    createBook('كتاب الفلسفة', '🧠'),
+                    createBook('كتاب التربية الإسلامية', '🕌'),
+                    createBook('كتاب اللغة الإنجليزية', '🇬🇧'),
+                    createBook('كتاب اللغة الفرنسية', '🇫🇷'),
+                    createBook('كتاب التربية البدنية', '🏃'),
+                    createBook('كتاب التربية المدنية', '🏛️'),
+                    { name: 'دفاتر الأنشطة', icon: '📓' },
+                    { name: 'أدلة الأستاذ', icon: '👨‍🏫' }
+                ]
+            };
+
+            const exercisesSecondary = {
+                name: 'التمارين',
+                icon: '📝',
+                children: [{
+                    name: 'تمارين اللغة العربية',
+                    icon: '📚',
+                    children: [
+                        { name: 'النحو', icon: '📝' },
+                        { name: 'الصرف', icon: '🔡' },
+                        { name: 'البلاغة', icon: '🎨' },
+                        { name: 'التعبير', icon: '✍️' },
+                        { name: 'المطالعة', icon: '👁️' }
+                    ]
+                }, {
+                    name: 'تمارين الرياضيات',
+                    icon: '🔢',
+                    children: [
+                        { name: 'الجبر', icon: '➗' },
+                        { name: 'الهندسة', icon: '📐' },
+                        { name: 'التحليل', icon: '📊' },
+                        { name: 'الإحصاء', icon: '🎲' },
+                        { name: 'المسائل', icon: '🧩' }
+                    ]
+                }, {
+                    name: 'تمارين الفيزياء والكيمياء',
+                    icon: '⚛️',
+                    children: [
+                        { name: 'الميكانيك', icon: '🔧' },
+                        { name: 'الكهرباء', icon: '⚡' },
+                        { name: 'المادة', icon: '🧪' },
+                        { name: 'الطاقة', icon: '🔥' },
+                        { name: 'الكيمياء', icon: '🧬' }
+                    ]
+                }, {
+                    name: 'تمارين العلوم الطبيعية',
+                    icon: '🌿',
+                    children: [
+                        { name: 'الخلية', icon: '🧬' },
+                        { name: 'الوراثة', icon: '🧫' },
+                        { name: 'التغذية', icon: '🍎' },
+                        { name: 'الجهاز العصبي', icon: '🧠' },
+                        { name: 'البيئة', icon: '🌍' }
+                    ]
+                }, {
+                    name: 'تمارين التاريخ والجغرافيا',
+                    icon: '🌍',
+                    children: [
+                        { name: 'التاريخ', icon: '📜' },
+                        { name: 'الجغرافيا', icon: '🗺️' },
+                        { name: 'الخرائط', icon: '🗺️' }
+                    ]
+                }, {
+                    name: 'تمارين الفلسفة',
+                    icon: '🧠',
+                    children: [
+                        { name: 'مبادئ الفلسفة', icon: '📚' },
+                        { name: 'المنطق', icon: '🔍' },
+                        { name: 'الأخلاق', icon: '❤️' },
+                        { name: 'النصوص الفلسفية', icon: '📄' }
+                    ]
+                }, {
+                    name: 'تمارين اللغة الإنجليزية',
+                    icon: '🇬🇧',
+                    children: [
+                        { name: 'المفردات', icon: '📚' },
+                        { name: 'القواعد', icon: '📝' },
+                        { name: 'القراءة', icon: '📖' },
+                        { name: 'الكتابة', icon: '✍️' }
+                    ]
+                }, {
+                    name: 'تمارين اللغة الفرنسية',
+                    icon: '🇫🇷',
+                    children: [
+                        { name: 'المفردات', icon: '📚' },
+                        { name: 'القواعد', icon: '📝' },
+                        { name: 'القراءة', icon: '📖' },
+                        { name: 'الكتابة', icon: '✍️' }
+                    ]
+                }, {
+                    name: 'تمارين التربية الإسلامية',
+                    icon: '🕌',
+                    children: [
+                        { name: 'القرآن', icon: '📖' },
+                        { name: 'الحديث', icon: '📜' },
+                        { name: 'الفقه', icon: '⚖️' },
+                        { name: 'السيرة', icon: '🌙' }
+                    ]
+                }]
+            };
+
+            const assessmentsSecondary = {
+                name: 'الفروض',
+                icon: '📋',
+                children: [
+                    { name: 'فروض اللغة العربية', icon: '📚' },
+                    { name: 'فروض الرياضيات', icon: '🔢' },
+                    { name: 'فروض الفيزياء والكيمياء', icon: '⚛️' },
+                    { name: 'فروض العلوم الطبيعية', icon: '🌿' },
+                    { name: 'فروض التاريخ والجغرافيا', icon: '🌍' },
+                    { name: 'فروض الفلسفة', icon: '🧠' },
+                    { name: 'فروض اللغة الإنجليزية', icon: '🇬🇧' },
+                    { name: 'فروض اللغة الفرنسية', icon: '🇫🇷' },
+                    { name: 'فروض التربية الإسلامية', icon: '🕌' },
+                    { name: 'فروض التربية المدنية', icon: '🏛️' }
+                ]
+            };
+
+            const examsSecondary = {
+                name: 'الاختبارات',
+                icon: '📑',
+                children: [
+                    { name: 'اختبارات اللغة العربية', icon: '📚' },
+                    { name: 'اختبارات الرياضيات', icon: '🔢' },
+                    { name: 'اختبارات الفيزياء والكيمياء', icon: '⚛️' },
+                    { name: 'اختبارات العلوم الطبيعية', icon: '🌿' },
+                    { name: 'اختبارات التاريخ والجغرافيا', icon: '🌍' },
+                    { name: 'اختبارات الفلسفة', icon: '🧠' },
+                    { name: 'اختبارات اللغة الإنجليزية', icon: '🇬🇧' },
+                    { name: 'اختبارات اللغة الفرنسية', icon: '🇫🇷' },
+                    { name: 'اختبارات التربية الإسلامية', icon: '🕌' },
+                    { name: 'اختبارات التربية المدنية', icon: '🏛️' }
+                ]
+            };
+
+            const gradesSecondary = {
+                name: 'الدرجات والمعدلات',
+                icon: '🏆',
+                children: [
+                    { name: 'درجات المواد', icon: '📚' },
+                    { name: 'درجات الفصول', icon: '📅' },
+                    { name: 'المعدل الفصلي', icon: '🧮' },
+                    { name: 'المعدل السنوي', icon: '📊' },
+                    { name: 'المعدل العام', icon: '⭐' },
+                    { name: 'النتيجة النهائية', icon: '🏆' }
+                ]
+            };
+
+            const filesSecondary = {
+                name: 'الملفات والتحميلات',
+                icon: '📁',
+                children: [
+                    { name: 'ملفات المواد الدراسية', icon: '📚' },
+                    { name: 'ملفات التمارين', icon: '📝' },
+                    { name: 'ملفات الفروض', icon: '📋' },
+                    { name: 'ملفات الاختبارات', icon: '📑' },
+                    { name: 'الكتب المدرسية', icon: '📚' },
+                    { name: 'ملفات البكالوريا', icon: '🎯' },
+                    { name: 'التحميلات', icon: '⬇️' }
+                ]
+            };
+
+            const gamesSecondary = {
+                name: 'الألعاب التعليمية',
+                icon: '🎮',
+                children: [
+                    { name: 'ألعاب اللغة العربية', icon: '🔤' },
+                    { name: 'ألعاب الرياضيات', icon: '🔢' },
+                    { name: 'ألعاب الفيزياء', icon: '⚛️' },
+                    { name: 'ألعاب العلوم', icon: '🌿' },
+                    { name: 'ألعاب التاريخ والجغرافيا', icon: '🌍' },
+                    { name: 'ألعاب الفلسفة', icon: '🧠' },
+                    { name: 'ألعاب اللغات', icon: '🗣️' },
+                    { name: 'ألعاب الذكاء', icon: '🧠' }
+                ]
+            };
+
+            const videosSecondary = {
+                name: 'الفيديوهات التعليمية',
+                icon: '🎬',
+                children: [
+                    { name: 'فيديوهات اللغة العربية', icon: '📚' },
+                    { name: 'فيديوهات الرياضيات', icon: '🔢' },
+                    { name: 'فيديوهات الفيزياء والكيمياء', icon: '⚛️' },
+                    { name: 'فيديوهات العلوم الطبيعية', icon: '🌿' },
+                    { name: 'فيديوهات التاريخ والجغرافيا', icon: '🌍' },
+                    { name: 'فيديوهات الفلسفة', icon: '🧠' },
+                    { name: 'فيديوهات اللغة الإنجليزية', icon: '🇬🇧' },
+                    { name: 'فيديوهات اللغة الفرنسية', icon: '🇫🇷' },
+                    { name: 'فيديوهات التربية الإسلامية', icon: '🕌' },
+                    { name: 'فيديوهات مراجعة البكالوريا', icon: '🎯' }
+                ]
+            };
+
+            const branches = {
+                name: 'الشعب والتخصصات',
+                icon: '🎯',
+                children: [{
+                    name: 'علوم تجريبية',
+                    icon: '🔬',
+                    children: [
+                        { name: 'الفيزياء والكيمياء', icon: '⚛️' },
+                        { name: 'العلوم الطبيعية', icon: '🌿' },
+                        { name: 'الرياضيات', icon: '🔢' },
+                        { name: 'التوجيه الجامعي', icon: '🎓' }
+                    ]
+                }, {
+                    name: 'رياضيات',
+                    icon: '🧮',
+                    children: [
+                        { name: 'الرياضيات', icon: '🔢' },
+                        { name: 'الفيزياء', icon: '⚡' },
+                        { name: 'الإعلام الآلي', icon: '💻' },
+                        { name: 'التوجيه الجامعي', icon: '🎓' }
+                    ]
+                }, {
+                    name: 'تقني رياضي',
+                    icon: '⚙️',
+                    children: [
+                        { name: 'الرياضيات', icon: '🔢' },
+                        { name: 'الفيزياء', icon: '⚡' },
+                        { name: 'التكنولوجيا', icon: '🔧' },
+                        { name: 'التوجيه الجامعي', icon: '🎓' }
+                    ]
+                }, {
+                    name: 'آداب وفلسفة',
+                    icon: '📚',
+                    children: [
+                        { name: 'اللغة العربية', icon: '🔤' },
+                        { name: 'الفلسفة', icon: '🧠' },
+                        { name: 'التاريخ والجغرافيا', icon: '🌍' },
+                        { name: 'التوجيه الجامعي', icon: '🎓' }
+                    ]
+                }, {
+                    name: 'لغات أجنبية',
+                    icon: '🌍',
+                    children: [
+                        { name: 'اللغة الإنجليزية', icon: '🇬🇧' },
+                        { name: 'اللغة الفرنسية', icon: '🇫🇷' },
+                        { name: 'اللغة الإسبانية', icon: '🇪🇸' },
+                        { name: 'اللغة الألمانية', icon: '🇩🇪' },
+                        { name: 'التوجيه الجامعي', icon: '🎓' }
+                    ]
+                }, {
+                    name: 'تسيير واقتصاد',
+                    icon: '💼',
+                    children: [
+                        { name: 'الاقتصاد', icon: '💰' },
+                        { name: 'المحاسبة', icon: '📊' },
+                        { name: 'التسيير', icon: '📋' },
+                        { name: 'القانون', icon: '⚖️' },
+                        { name: 'التوجيه الجامعي', icon: '🎓' }
+                    ]
+                }, {
+                    name: 'فنون',
+                    icon: '🎨',
+                    children: [
+                        { name: 'الرسم', icon: '🎨' },
+                        { name: 'الموسيقى', icon: '🎵' },
+                        { name: 'المسرح', icon: '🎭' },
+                        { name: 'التشكيل', icon: '🖼️' },
+                        { name: 'التوجيه الجامعي', icon: '🎓' }
+                    ]
+                }]
+            };
+
+            const baccalaureate = {
+                name: 'البكالوريا',
+                icon: '📚',
+                children: [
+                    { name: 'دروس المراجعة', icon: '📖' },
+                    { name: 'تمارين البكالوريا', icon: '📝' },
+                    { name: 'مواضيع سابقة', icon: '📋' },
+                    { name: 'الحلول النموذجية', icon: '✅' },
+                    { name: 'حساب معدل البكالوريا', icon: '📊' },
+                    { name: 'اختبارات تجريبية', icon: '🎯' },
+                    { name: 'فيديوهات المراجعة', icon: '🎬' },
+                    { name: 'نتائج البكالوريا', icon: '🏆' }
+                ]
+            };
+
+            const universityGuidance = {
+                name: 'التوجيه الجامعي',
+                icon: '🎓',
+                children: [
+                    { name: 'اختيار التخصص', icon: '🧭' },
+                    { name: 'التخصصات الجامعية', icon: '🏫' },
+                    { name: 'معدلات القبول', icon: '📊' },
+                    { name: 'مجالات العمل', icon: '💼' },
+                    { name: 'مسارات الدراسة', icon: '🗺️' }
+                ]
+            };
+
+            function deepClone(obj) {
+                return JSON.parse(JSON.stringify(obj));
+            }
+
+            function createSecondaryYearData(yearName, extraChildren) {
+                let yearChildren = [];
+                yearChildren.push(deepClone(subjectsSecondary));
+                yearChildren.push(deepClone(booksCommon));
+                yearChildren.push(deepClone(exercisesSecondary));
+                yearChildren.push(deepClone(assessmentsSecondary));
+                yearChildren.push(deepClone(examsSecondary));
+                yearChildren.push(deepClone(gradesSecondary));
+                yearChildren.push(deepClone(filesSecondary));
+                yearChildren.push(deepClone(gamesSecondary));
+                yearChildren.push(deepClone(videosSecondary));
+                yearChildren.push({ name: 'التدرجات السنوية', icon: '📅' });
+                if (extraChildren && extraChildren.length) {
+                    yearChildren = yearChildren.concat(extraChildren);
+                }
+                return { name: yearName, icon: '🎓', children: yearChildren };
+            }
+
+            function createMiddleYearData(yearName, extraChildren) {
+                let yearChildren = [];
+                let subjectsClone = deepClone(subjectsMiddle);
+                yearChildren.push(subjectsClone);
+                yearChildren.push(deepClone(booksCommon));
+                let exercisesClone = deepClone(exercisesSecondary);
+                exercisesClone.children = exercisesClone.children.filter(e =>
+                    ['تمارين اللغة العربية', 'تمارين الرياضيات', 'تمارين الفيزياء والكيمياء', 'تمارين العلوم الطبيعية',
+                        'تمارين التاريخ والجغرافيا', 'تمارين اللغة الإنجليزية', 'تمارين اللغة الفرنسية', 'تمارين التربية الإسلامية'
+                    ].includes(e.name)
+                );
+                yearChildren.push(exercisesClone);
+                let assessmentsClone = deepClone(assessmentsSecondary);
+                assessmentsClone.children = assessmentsClone.children.filter(a =>
+                    ['فروض اللغة العربية', 'فروض الرياضيات', 'فروض الفيزياء والكيمياء', 'فروض العلوم الطبيعية',
+                        'فروض التاريخ والجغرافيا', 'فروض اللغة الإنجليزية', 'فروض اللغة الفرنسية', 'فروض التربية الإسلامية'
+                    ].includes(a.name)
+                );
+                yearChildren.push(assessmentsClone);
+                let examsClone = deepClone(examsSecondary);
+                examsClone.children = examsClone.children.filter(a =>
+                    ['اختبارات اللغة العربية', 'اختبارات الرياضيات', 'اختبارات الفيزياء والكيمياء', 'اختبارات العلوم الطبيعية',
+                        'اختبارات التاريخ والجغرافيا', 'اختبارات اللغة الإنجليزية', 'اختبارات اللغة الفرنسية',
+                        'اختبارات التربية الإسلامية'
+                    ].includes(a.name)
+                );
+                yearChildren.push(examsClone);
+                yearChildren.push(deepClone(gradesSecondary));
+                yearChildren.push(deepClone(filesSecondary));
+                yearChildren.push(deepClone(gamesSecondary));
+                yearChildren.push(deepClone(videosSecondary));
+                yearChildren.push({ name: 'التدرجات السنوية', icon: '📅' });
+                if (extraChildren && extraChildren.length) {
+                    yearChildren = yearChildren.concat(extraChildren);
+                }
+                return { name: yearName, icon: '🎓', children: yearChildren };
+            }
+
+            function createYearDataPrimary(yearName, includeFrench, extraChildren) {
+                let yearChildren = [];
+                let subjectsClone = deepClone(subjectsPrimary);
+                if (includeFrench) {
+                    subjectsClone.children.push({
+                        name: 'اللغة الفرنسية',
+                        icon: '🇫🇷',
+                        children: [
+                            { name: 'المقاطع الصوتية', icon: '🔊' },
+                            { name: 'الحروف الفرنسية', icon: '🔤' },
+                            { name: 'القراءة', icon: '📖' },
+                            { name: 'الكتابة', icon: '✍️' },
+                            { name: 'التعبير', icon: '💬' },
+                            { name: 'النشاط', icon: '📝' },
+                            { name: 'التقويم', icon: '🎯' }
+                        ]
+                    });
+                }
+                yearChildren.push(subjectsClone);
+                let booksClone = deepClone(booksCommon);
+                if (includeFrench) {
+                    booksClone.children.push({
+                        name: 'كتاب اللغة الفرنسية',
+                        icon: '📔',
+                        children: [
+                            { name: 'الكتاب المدرسي', icon: '📕' },
+                            { name: 'دفتر الأنشطة', icon: '📓' },
+                            { name: 'دليل الأستاذ', icon: '👨‍🏫' }
+                        ]
+                    });
+                }
+                yearChildren.push(booksClone);
+                let exercisesClone = deepClone(exercisesSecondary);
+                exercisesClone.children = exercisesClone.children.filter(e =>
+                    ['تمارين اللغة العربية', 'تمارين الرياضيات', 'تمارين التاريخ والجغرافيا', 'تمارين اللغة الإنجليزية',
+                        'تمارين التربية الإسلامية', 'تمارين التربية المدنية'
+                    ].includes(e.name)
+                );
+                if (includeFrench) {
+                    exercisesClone.children.push({
+                        name: 'تمارين اللغة الفرنسية',
+                        icon: '📚',
+                        children: [
+                            { name: 'الحروف', icon: '🔤' },
+                            { name: 'المقاطع', icon: '🔡' },
+                            { name: 'القراءة', icon: '📖' },
+                            { name: 'الكتابة', icon: '✍️' },
+                            { name: 'الاستماع', icon: '👂' }
+                        ]
+                    });
+                }
+                yearChildren.push(exercisesClone);
+                let assessmentsClone = deepClone(assessmentsSecondary);
+                assessmentsClone.children = assessmentsClone.children.filter(a =>
+                    ['فروض اللغة العربية', 'فروض الرياضيات', 'فروض التربية الإسلامية', 'فروض التربية المدنية'].includes(a.name)
+                );
+                if (includeFrench) {
+                    assessmentsClone.children.push({
+                        name: 'فروض اللغة الفرنسية',
+                        icon: '📚',
+                        children: [
+                            { name: 'القراءة', icon: '📖' },
+                            { name: 'الكتابة', icon: '✍️' },
+                            { name: 'الاستماع', icon: '👂' },
+                            { name: 'النشاط', icon: '📝' }
+                        ]
+                    });
+                }
+                yearChildren.push(assessmentsClone);
+                let examsClone = deepClone(examsSecondary);
+                examsClone.children = examsClone.children.filter(a =>
+                    ['اختبارات اللغة العربية', 'اختبارات الرياضيات', 'اختبارات التربية الإسلامية', 'اختبارات التربية المدنية']
+                    .includes(a.name)
+                );
+                if (includeFrench) {
+                    examsClone.children.push({
+                        name: 'اختبارات اللغة الفرنسية',
+                        icon: '📚',
+                        children: [
+                            { name: 'قراءة', icon: '📖' },
+                            { name: 'كتابة', icon: '✍️' },
+                            { name: 'استماع', icon: '👂' },
+                            { name: 'نشاط', icon: '📝' }
+                        ]
+                    });
+                }
+                yearChildren.push(examsClone);
+                yearChildren.push(deepClone(gradesSecondary));
+                yearChildren.push(deepClone(filesSecondary));
+                yearChildren.push(deepClone(gamesSecondary));
+                yearChildren.push(deepClone(videosSecondary));
+                yearChildren.push({ name: 'التدرجات السنوية', icon: '📅' });
+                if (extraChildren && extraChildren.length) {
+                    yearChildren = yearChildren.concat(extraChildren);
+                }
+                return { name: yearName, icon: '🎓', children: yearChildren };
+            }
+
+            const primaryYear1 = createYearDataPrimary('السنة الأولى ابتدائي', false, []);
+            const primaryYear2 = createYearDataPrimary('السنة الثانية ابتدائي', true, []);
+            const primaryYear3 = createYearDataPrimary('السنة الثالثة ابتدائي', true, []);
+            const primaryYear4 = createYearDataPrimary('السنة الرابعة ابتدائي', true, []);
+            const primaryYear5 = createYearDataPrimary('السنة الخامسة ابتدائي', true, [
+                { name: 'شهادة التعليم الابتدائي والمراجعة النهائية', icon: '🎯' }
+            ]);
+
+            const middleYear1 = createMiddleYearData('السنة الأولى متوسط', []);
+            const middleYear2 = createMiddleYearData('السنة الثانية متوسط', []);
+            const middleYear3 = createMiddleYearData('السنة الثالثة متوسط', []);
+            const middleYear4 = createMiddleYearData('السنة الرابعة متوسط', []);
+
+            const secondaryYear1 = createSecondaryYearData('السنة الأولى ثانوي', []);
+            const secondaryYear2 = createSecondaryYearData('السنة الثانية ثانوي', []);
+            const secondaryYear3 = createSecondaryYearData('السنة الثالثة ثانوي', []);
+
+            const childPreparation = {
+                name: 'تحضيرات الطفل',
+                icon: '👶',
+                children: [{
+                    name: 'تحضير الطفل للتعلم',
+                    icon: '🧠',
+                    children: [
+                        { name: 'التركيز والانتباه', icon: '🎯' },
+                        { name: 'الذاكرة', icon: '🧠' },
+                        { name: 'الملاحظة', icon: '👀' },
+                        { name: 'التفكير', icon: '🧩' }
+                    ]
+                }, {
+                    name: 'المهارات الأساسية',
+                    icon: '✋',
+                    children: [
+                        { name: 'مسك القلم', icon: '✏️' },
+                        { name: 'الكتابة', icon: '✍️' },
+                        { name: 'استخدام المقص', icon: '✂️' },
+                        { name: 'التلوين', icon: '🖍️' },
+                        { name: 'التركيب', icon: '🧩' }
+                    ]
+                }, {
+                    name: 'اللغة والتواصل',
+                    icon: '🗣️',
+                    children: [
+                        { name: 'الحروف', icon: '🔤' },
+                        { name: 'الأصوات', icon: '🔊' },
+                        { name: 'التحدث', icon: '🗣️' },
+                        { name: 'الاستماع', icon: '📖' },
+                        { name: 'الكلمات', icon: '🧩' }
+                    ]
+                }, {
+                    name: 'المفاهيم الأساسية',
+                    icon: '🔢',
+                    children: [
+                        { name: 'الأرقام', icon: '🔢' },
+                        { name: 'الألوان', icon: '🎨' },
+                        { name: 'الأشكال', icon: '🔷' },
+                        { name: 'الأحجام', icon: '📏' },
+                        { name: 'الاتجاهات والمواقع', icon: '📍' }
+                    ]
+                }, {
+                    name: 'المهارات الشخصية والاجتماعية',
+                    icon: '❤️',
+                    children: [
+                        { name: 'الثقة بالنفس', icon: '😊' },
+                        { name: 'التعاون', icon: '🤝' },
+                        { name: 'التواصل', icon: '🗣️' },
+                        { name: 'تحمل المسؤولية', icon: '🧹' },
+                        { name: 'الاعتماد على النفس', icon: '🌟' }
+                    ]
+                }, {
+                    name: 'أنشطة التحضير',
+                    icon: '🎮',
+                    children: [
+                        { name: 'أنشطة ذهنية', icon: '🧩' },
+                        { name: 'أنشطة الكتابة', icon: '✏️' },
+                        { name: 'أنشطة فنية', icon: '🎨' },
+                        { name: 'أنشطة التفكير', icon: '🧠' },
+                        { name: 'أنشطة حركية', icon: '🏃' }
+                    ]
+                }]
+            };
+
+            const preparatory = {
+                name: 'تعليم التحضيري',
+                icon: '🎒',
+                children: [{
+                    name: 'اللغة والتواصل',
+                    icon: '🔤',
+                    children: [
+                        { name: 'الحروف', icon: '🔤' },
+                        { name: 'الأصوات', icon: '🔊' },
+                        { name: 'التحدث والتعبير', icon: '🗣️' },
+                        { name: 'القصص', icon: '📖' },
+                        { name: 'الكلمات', icon: '🧩' }
+                    ]
+                }, {
+                    name: 'الرياضيات والمنطق',
+                    icon: '🔢',
+                    children: [
+                        { name: 'الأعداد', icon: '🔢' },
+                        { name: 'المقارنة', icon: '🔍' },
+                        { name: 'الأشكال', icon: '🔷' },
+                        { name: 'الأحجام', icon: '📏' },
+                        { name: 'الألوان', icon: '🎨' },
+                        { name: 'التصنيف والترتيب', icon: '🧩' }
+                    ]
+                }, {
+                    name: 'اكتشاف المحيط',
+                    icon: '🌱',
+                    children: [
+                        { name: 'جسم الإنسان', icon: '👤' },
+                        { name: 'العائلة', icon: '👨‍👩‍👧' },
+                        { name: 'المدرسة', icon: '🏫' },
+                        { name: 'الحيوانات', icon: '🐾' },
+                        { name: 'النباتات', icon: '🌱' },
+                        { name: 'البيئة', icon: '🌍' }
+                    ]
+                }, {
+                    name: 'التهيئة للكتابة والقراءة',
+                    icon: '✍️',
+                    children: [
+                        { name: 'مسك القلم', icon: '✏️' },
+                        { name: 'تتبع الخطوط', icon: '➰' },
+                        { name: 'تتبع الأشكال', icon: '🔵' },
+                        { name: 'تتبع الحروف', icon: '🔤' },
+                        { name: 'التهيئة للقراءة', icon: '📖' }
+                    ]
+                }, {
+                    name: 'الأنشطة الإبداعية',
+                    icon: '🎨',
+                    children: [
+                        { name: 'التلوين', icon: '🖍️' },
+                        { name: 'الرسم', icon: '✏️' },
+                        { name: 'القص واللصق', icon: '✂️' },
+                        { name: 'التركيب', icon: '🧩' },
+                        { name: 'التمثيل', icon: '🎭' }
+                    ]
+                }, {
+                    name: 'الألعاب التعليمية',
+                    icon: '🎮',
+                    children: [
+                        { name: 'الذاكرة', icon: '🧠' },
+                        { name: 'الألغاز', icon: '🧩' },
+                        { name: 'ألعاب الحروف', icon: '🔤' },
+                        { name: 'ألعاب الأرقام', icon: '🔢' },
+                        { name: 'التركيز والانتباه', icon: '🎯' }
+                    ]
+                }, {
+                    name: 'الفيديوهات التعليمية',
+                    icon: '🎬',
+                    children: [
+                        { name: 'الحروف والأصوات', icon: '🔤' },
+                        { name: 'الأرقام', icon: '🔢' },
+                        { name: 'الألوان والأشكال', icon: '🎨' },
+                        { name: 'القصص', icon: '📖' },
+                        { name: 'الأناشيد', icon: '🎵' }
+                    ]
+                }, {
+                    name: 'الملفات والأنشطة',
+                    icon: '📁',
+                    children: [
+                        { name: 'أوراق العمل', icon: '📝' },
+                        { name: 'أنشطة التلوين', icon: '🎨' },
+                        { name: 'أنشطة المطابقة', icon: '🧩' },
+                        { name: 'تحميل الأنشطة', icon: '⬇️' }
+                    ]
+                }]
+            };
+
+            const primaryStage = {
+                name: 'مرحلة الابتدائي',
+                icon: '✏️',
+                children: [primaryYear1, primaryYear2, primaryYear3, primaryYear4, primaryYear5]
+            };
+
+            const middleStage = {
+                name: 'التعليم المتوسط',
+                icon: '🏫',
+                children: [middleYear1, middleYear2, middleYear3, middleYear4]
+            };
+
+            const secondaryStage = {
+                name: 'التعليم الثانوي',
+                icon: '🎓',
+                children: [secondaryYear1, secondaryYear2, secondaryYear3, branches, baccalaureate, universityGuidance]
+            };
+
+            const data = {
+                name: 'الرئيسية',
+                children: [
+                    childPreparation,
+                    preparatory,
+                    primaryStage,
+                    middleStage,
+                    secondaryStage,
+                    { name: 'مركز التعلم', icon: '💡' },
+                    { name: 'دروس خصوصية', icon: '👨‍🏫' },
+                    { name: 'أنشطة', icon: '🎨' },
+                    { name: 'استشارات', icon: '🧑‍💼' }
+                ]
+            };
+
+            // ============================================================
+            // 8. إنشاء المربعات
+            // ============================================================
+            function createBubbles() {
+                data.children.forEach((item, i) => {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'bubble';
+                    bubble.textContent = item.name;
+                    bubble.style.transitionDelay = (i * 0.1) + 's';
+                    bubblesContainer.appendChild(bubble);
+                    bubble._data = item;
+
+                    bubble.addEventListener('click', function() {
+                        if (this.classList.contains('pop')) return;
+                        playPopSound();
+                        openModal(this._data, [this._data]);
+                    });
+
+                    bubble.addEventListener('mouseenter', function() {
+                        if (!this.classList.contains('pop')) playHoverSound();
+                    });
+
+                    setTimeout(() => {
+                        bubble.classList.add('show');
+                        playAppearSound();
+                    }, i * 100 + 150);
+                });
+            }
+
+            // ============================================================
+            // 9. نظام التنقل
+            // ============================================================
+            let currentPath = [];
+
+            function openModal(node, path) {
+                currentPath = path || [node];
+                renderModal(node);
+                modalOverlay.classList.add('active');
+                playAppearSound();
+            }
+
+            function renderModal(node) {
+                modalTitle.textContent = node.name || 'العنوان';
+                breadcrumb.innerHTML = '';
+                currentPath.forEach((item, index) => {
+                    const crumb = document.createElement('span');
+                    crumb.className = 'crumb' + (index === currentPath.length - 1 ? ' current' : '');
+                    crumb.textContent = item.icon + ' ' + item.name;
+                    if (index < currentPath.length - 1) {
+                        crumb.style.cursor = 'pointer';
+                        crumb.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            const newPath = currentPath.slice(0, index + 1);
+                            currentPath = newPath;
+                            renderModal(newPath[newPath.length - 1]);
+                            playHoverSound();
+                        });
+                    }
+                    breadcrumb.appendChild(crumb);
+                    if (index < currentPath.length - 1) {
+                        const sep = document.createElement('span');
+                        sep.className = 'sep';
+                        sep.textContent = ' › ';
+                        breadcrumb.appendChild(sep);
+                    }
+                });
+
+                subItemsContainer.innerHTML = '';
+                if (node.children && node.children.length > 0) {
+                    const grid = document.createElement('div');
+                    grid.className = 'sub-grid';
+                    node.children.forEach(child => {
+                        const div = document.createElement('div');
+                        div.className = 'sub-item';
+                        div.innerHTML = `
+                            <span class="sub-icon">${child.icon || '📄'}</span>
+                            <span class="sub-name">${child.name}</span>
+                        `;
+                        div.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            playPopSound();
+                            if (child.children && child.children.length > 0) {
+                                const newPath = [...currentPath, child];
+                                currentPath = newPath;
+                                renderModal(child);
+                            } else {
+                                openDetail(child);
+                            }
+                        });
+                        div.addEventListener('mouseenter', function() { playHoverSound(); });
+                        grid.appendChild(div);
+                    });
+                    subItemsContainer.appendChild(grid);
+                } else {
+                    subItemsContainer.innerHTML =
+                        '<p style="color:rgba(255,255,255,0.6);text-align:center;padding:20px 0;">لا توجد تفاصيل فرعية.</p>';
+                }
+            }
+
+            // ============================================================
+            // 10. التفاصيل
+            // ============================================================
+            function openDetail(item) {
+                detailIcon.textContent = item.icon || '📘';
+                detailTitle.textContent = item.name;
+                detailDesc.textContent = item.desc || 'تفاصيل إضافية عن هذا العنصر.';
+                detailOverlay.classList.add('active');
+                playAppearSound();
+            }
+
+            function closeDetail() {
+                detailOverlay.classList.remove('active');
+                playCloseSound();
+            }
+
+            function closeModal() {
+                modalOverlay.classList.remove('active');
+                playCloseSound();
+            }
+
+            function playCloseSound() {
+                try {
+                    const ctx = getAudioCtx();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.value = 400;
+                    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.1);
+                } catch (e) {}
+            }
+
+            modalClose.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+            detailClose.addEventListener('click', closeDetail);
+            detailOverlay.addEventListener('click', function(e) {
+                if (e.target === this) closeDetail();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    if (detailOverlay.classList.contains('active')) closeDetail();
+                    else if (modalOverlay.classList.contains('active')) closeModal();
+                }
+            });
+
+            // ============================================================
+            // 11. نظام الصوت
+            // ============================================================
+            let audioCtx = null;
+
+            function getAudioCtx() {
+                if (!audioCtx) {
+                    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                }
+                return audioCtx;
+            }
+
+            function playAppearSound() {
+                try {
+                    const ctx = getAudioCtx();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.value = 600 + Math.random() * 200;
+                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.12);
+                } catch (e) {}
+            }
+
+            function playHoverSound() {
+                try {
+                    const ctx = getAudioCtx();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.value = 800 + Math.random() * 300;
+                    gain.gain.setValueAtTime(0.06, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+                    osc.start(ctx.currentTime);
+                    osc.stop(ctx.currentTime + 0.08);
+                } catch (e) {}
+            }
+
+            function playPopSound() {
+                try {
+                    const ctx = getAudioCtx();
+                    const bufferSize = ctx.sampleRate * 0.25;
+                    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.08));
+                    }
+                    const noise = ctx.createBufferSource();
+                    noise.buffer = buffer;
+                    const gain = ctx.createGain();
+                    const filter = ctx.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 700;
+                    noise.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(ctx.destination);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+                    noise.start(ctx.currentTime);
+                    noise.stop(ctx.currentTime + 0.25);
+                } catch (e) {}
+            }
+
+            // ============================================================
+            // 12. تهيئة إضافية
+            // ============================================================
+            // إخفاء محتوى الاشتراك مبدئياً
+            subscribedContent.style.display = 'none';
+
+            // عند تفعيل الاشتراك، نظهره
+            const origSubscribe = subscribeBox.addEventListener;
+            // نراقب إضافة الصنف subscribed
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        if (subscribeBox.classList.contains('subscribed')) {
+                            subscribedContent.style.display = 'flex';
+                        }
+                    }
+                });
+            });
+            observer.observe(subscribeBox, { attributes: true });
+
+            // تصحيح: نضبط display أول مرة
+            if (subscribeBox.classList.contains('subscribed')) {
+                subscribedContent.style.display = 'flex';
+            }
+
+            // منع النقر المزدوج على زر التالي أثناء العد
+            console.log('🚀 Vireon جاهز مع تأثيرات الاشتراك المذهلة!');
+        })();
+    </script>
+
+</body>
+</html>
