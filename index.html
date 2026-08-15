@@ -1031,6 +1031,88 @@
             }
         }
     </style>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+/* ═══════════════════════════════════════
+   VIREON — Firebase Live Sync
+   ═══════════════════════════════════════ */
+const FIREBASE_CONFIG = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+let fbApp=null, db=null, useLocal=false, liveData={settings:{},content:null};
+
+function initVireonSync(){
+  const hasCfg = FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes('YOUR');
+  if(!hasCfg){
+    console.log('Vireon: Firebase not configured, using localStorage fallback');
+    useLocal=true;
+    loadLocalData();
+    return;
+  }
+  try{
+    fbApp=firebase.initializeApp(FIREBASE_CONFIG);
+    db=firebase.database();
+    // Listen to settings
+    db.ref('vireon/settings').on('value',snap=>{
+      const s=snap.val()||{};
+      liveData.settings=s;
+      applySettings(s);
+    });
+    // Listen to content
+    db.ref('vireon/content').on('value',snap=>{
+      const c=snap.val();
+      if(c){liveData.content=c;applyContent(c);}
+    });
+    console.log('Vireon: Connected to Firebase realtime');
+  }catch(e){
+    console.error('Vireon Firebase error:',e);
+    useLocal=true;loadLocalData();
+  }
+}
+
+function loadLocalData(){
+  try{
+    const s=localStorage.getItem('vireon_settings');
+    const c=localStorage.getItem('vireon_content');
+    if(s)applySettings(JSON.parse(s));
+    if(c)applyContent(JSON.parse(c));
+  }catch(e){}
+}
+
+function applySettings(s){
+  if(s.siteName)document.title=s.siteName;
+  if(s.welcomeMsg){
+    const sp=document.getElementById('splashText');
+    if(sp)sp.textContent=s.welcomeMsg;
+  }
+  if(s.channelUrl)window.__vireonChannelUrl=s.channelUrl;
+  if(s.countdownTime)window.__vireonCountdown=parseInt(s.countdownTime);
+  if(s.starsCount)window.__vireonStars=parseInt(s.starsCount);
+  if(s.soundEnabled===false)window.__vireonSoundOff=true;
+  if(s.newsEnabled===false)window.__vireonNewsOff=true;
+  if(s.primaryColor){
+    document.documentElement.style.setProperty('--v-primary',s.primaryColor);
+  }
+}
+
+function applyContent(c){
+  window.__vireonContent=c;
+  // The main script will check this variable
+}
+
+// Start sync
+initVireonSync();
+</script>
 <base target="_blank">
 </head>
 <body>
@@ -1043,7 +1125,7 @@
 
     <!-- ===== الصفحة الرئيسية ===== -->
     <div id="main-page">
-        <div class="vireon-strip" id="vireonStrip"><h1>Vireon</h1><a href="admin.html" id="adminLink" style="position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:1.2rem;color:rgba(255,255,255,0.4);text-decoration:none;transition:color 0.3s;z-index:10;" onmouseover="this.style.color='#a5d6a7'" onmouseout="this.style.color='rgba(255,255,255,0.4)'" title="لوحة التحكم">⚙️</a></div>
+        <div class="vireon-strip" id="vireonStrip"><h1>Vireon</h1><a href="admin.html" id="adminLink" style="position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:1.2rem;color:rgba(255,255,255,.4);text-decoration:none;transition:color .3s;z-index:10;" onmouseover="this.style.color='#a5d6a7'" onmouseout="this.style.color='rgba(255,255,255,.4)'" title="لوحة التحكم">⚙️</a></div>
         <h1 id="vireonName">Vireon</h1>
 
         <div class="subscribe-container" id="subscribeContainer">
@@ -1127,27 +1209,7 @@
 
     <div class="credit">✦ ✦ ✦</div>
 
-    
-    // ===== ADMIN PANEL SYNC SYSTEM =====
-    (function() {
-        const syncData = localStorage.getItem('vireon_sync_data');
-        if (syncData) {
-            try {
-                const parsed = JSON.parse(syncData);
-                window.__vireonSettings = parsed.settings || {};
-                window.__vireonContent = parsed.content || null;
-            } catch(e) {}
-        }
-        const settings = window.__vireonSettings || {};
-        if (settings.siteName) document.title = settings.siteName;
-        if (settings.channelUrl) window.__vireonChannelUrl = settings.channelUrl;
-        if (settings.welcomeMsg) window.__vireonWelcomeMsg = settings.welcomeMsg;
-        if (settings.countdownTime) window.__vireonCountdown = parseInt(settings.countdownTime);
-        if (settings.starsCount) window.__vireonStars = parseInt(settings.starsCount);
-        if (settings.newsEnabled === false) window.__vireonNewsOff = true;
-        if (settings.soundEnabled === false) window.__vireonSoundOff = true;
-    })();
-<script>
+    <script>
         (function() {
             'use strict';
 
@@ -1532,7 +1594,7 @@
                             setTimeout(() => {
                                 createBubbles();
                                 centerContent.classList.add('active');
-                                if (!window.__vireonNewsOff) newsBar.classList.add('active');
+                                if(!window.__vireonNewsOff)newsBar.classList.add('active');
                                 isAnimating = false;
                             }, 1200);
                         }, 2000);
@@ -2622,7 +2684,7 @@
                 playCloseSound();
             }
 
-            function playCloseSound() { if (window.__vireonSoundOff) return;
+            function playCloseSound() { if(window.__vireonSoundOff)return;
                 try {
                     const ctx = getAudioCtx();
                     const osc = ctx.createOscillator();
@@ -2665,7 +2727,7 @@
                 return audioCtx;
             }
 
-            function playAppearSound() { if (window.__vireonSoundOff) return;
+            function playAppearSound() { if(window.__vireonSoundOff)return;
                 try {
                     const ctx = getAudioCtx();
                     const osc = ctx.createOscillator();
@@ -2681,7 +2743,7 @@
                 } catch (e) {}
             }
 
-            function playHoverSound() { if (window.__vireonSoundOff) return;
+            function playHoverSound() { if(window.__vireonSoundOff)return;
                 try {
                     const ctx = getAudioCtx();
                     const osc = ctx.createOscillator();
@@ -2697,7 +2759,7 @@
                 } catch (e) {}
             }
 
-            function playPopSound() { if (window.__vireonSoundOff) return;
+            function playPopSound() { if(window.__vireonSoundOff)return;
                 try {
                     const ctx = getAudioCtx();
                     const bufferSize = ctx.sampleRate * 0.25;
@@ -2752,15 +2814,10 @@
         })();
     </script>
 
-
-    <script>
-    (function(){
-        const st = window.__vireonSettings || {};
-        if (st.welcomeMsg) {
-            const el = document.getElementById('splashText');
-            if (el) el.textContent = st.welcomeMsg;
-        }
-    })();
-    </script>
-</body>
+<script>
+(function(){
+  const st=window.__vireonSettings||{};
+  if(st.welcomeMsg){const el=document.getElementById('splashText');if(el)el.textContent=st.welcomeMsg;}
+})();
+</script></body>
 </html>
