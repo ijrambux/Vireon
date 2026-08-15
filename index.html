@@ -1031,6 +1031,7 @@
             }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
 
@@ -1038,11 +1039,11 @@
     <div id="stars-container"></div>
 
     <!-- ===== شاشة "أهلاً" ===== -->
-    <div id="splash-screen"><h1>أهلاً</h1></div>
+    <div id="splash-screen"><h1 id="splashText">أهلاً</h1></div>
 
     <!-- ===== الصفحة الرئيسية ===== -->
     <div id="main-page">
-        <div class="vireon-strip" id="vireonStrip"><h1>Vireon</h1></div>
+        <div class="vireon-strip" id="vireonStrip"><h1>Vireon</h1><a href="admin.html" id="adminLink" style="position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:1.2rem;color:rgba(255,255,255,0.4);text-decoration:none;transition:color 0.3s;z-index:10;" onmouseover="this.style.color='#a5d6a7'" onmouseout="this.style.color='rgba(255,255,255,0.4)'" title="لوحة التحكم">⚙️</a></div>
         <h1 id="vireonName">Vireon</h1>
 
         <div class="subscribe-container" id="subscribeContainer">
@@ -1126,7 +1127,27 @@
 
     <div class="credit">✦ ✦ ✦</div>
 
-    <script>
+    
+    // ===== ADMIN PANEL SYNC SYSTEM =====
+    (function() {
+        const syncData = localStorage.getItem('vireon_sync_data');
+        if (syncData) {
+            try {
+                const parsed = JSON.parse(syncData);
+                window.__vireonSettings = parsed.settings || {};
+                window.__vireonContent = parsed.content || null;
+            } catch(e) {}
+        }
+        const settings = window.__vireonSettings || {};
+        if (settings.siteName) document.title = settings.siteName;
+        if (settings.channelUrl) window.__vireonChannelUrl = settings.channelUrl;
+        if (settings.welcomeMsg) window.__vireonWelcomeMsg = settings.welcomeMsg;
+        if (settings.countdownTime) window.__vireonCountdown = parseInt(settings.countdownTime);
+        if (settings.starsCount) window.__vireonStars = parseInt(settings.starsCount);
+        if (settings.newsEnabled === false) window.__vireonNewsOff = true;
+        if (settings.soundEnabled === false) window.__vireonSoundOff = true;
+    })();
+<script>
         (function() {
             'use strict';
 
@@ -1135,7 +1156,7 @@
             // ============================================================
             const container = document.getElementById('stars-container');
             const frag = document.createDocumentFragment();
-            for (let i = 0; i < 200; i++) {
+            for (let i = 0; i < (window.__vireonStars || 200); i++) {
                 const star = document.createElement('div');
                 star.className = 'star';
                 const size = 1.5 + Math.random() * 3;
@@ -1183,9 +1204,9 @@
             let isSubscribed = false;
             let nextVisible = false;
             let isAnimating = false;
-            let countdownValue = 10;
+            let countdownValue = window.__vireonCountdown || 10;
             let countdownInterval = null;
-            const CHANNEL_URL = 'https://www.youtube.com/@VIREON10';
+            const CHANNEL_URL = window.__vireonChannelUrl || 'https://www.youtube.com/@VIREON10';
 
             // ===== حجم الكانفاس =====
             function resizeCanvas() {
@@ -1452,7 +1473,7 @@
                 }, 600);
 
                 // بدء العد التنازلي
-                countdownValue = 10;
+                countdownValue = window.__vireonCountdown || 10;
                 countdownTimer.textContent = countdownValue;
                 if (countdownInterval) clearInterval(countdownInterval);
                 countdownInterval = setInterval(() => {
@@ -1511,7 +1532,7 @@
                             setTimeout(() => {
                                 createBubbles();
                                 centerContent.classList.add('active');
-                                newsBar.classList.add('active');
+                                if (!window.__vireonNewsOff) newsBar.classList.add('active');
                                 isAnimating = false;
                             }, 1200);
                         }, 2000);
@@ -2466,7 +2487,7 @@
                 children: [secondaryYear1, secondaryYear2, secondaryYear3, branches, baccalaureate, universityGuidance]
             };
 
-            const data = {
+            const data = window.__vireonContent || {
                 name: 'الرئيسية',
                 children: [
                     childPreparation,
@@ -2601,7 +2622,7 @@
                 playCloseSound();
             }
 
-            function playCloseSound() {
+            function playCloseSound() { if (window.__vireonSoundOff) return;
                 try {
                     const ctx = getAudioCtx();
                     const osc = ctx.createOscillator();
@@ -2644,7 +2665,7 @@
                 return audioCtx;
             }
 
-            function playAppearSound() {
+            function playAppearSound() { if (window.__vireonSoundOff) return;
                 try {
                     const ctx = getAudioCtx();
                     const osc = ctx.createOscillator();
@@ -2660,7 +2681,7 @@
                 } catch (e) {}
             }
 
-            function playHoverSound() {
+            function playHoverSound() { if (window.__vireonSoundOff) return;
                 try {
                     const ctx = getAudioCtx();
                     const osc = ctx.createOscillator();
@@ -2676,7 +2697,7 @@
                 } catch (e) {}
             }
 
-            function playPopSound() {
+            function playPopSound() { if (window.__vireonSoundOff) return;
                 try {
                     const ctx = getAudioCtx();
                     const bufferSize = ctx.sampleRate * 0.25;
@@ -2731,5 +2752,15 @@
         })();
     </script>
 
+
+    <script>
+    (function(){
+        const st = window.__vireonSettings || {};
+        if (st.welcomeMsg) {
+            const el = document.getElementById('splashText');
+            if (el) el.textContent = st.welcomeMsg;
+        }
+    })();
+    </script>
 </body>
 </html>
