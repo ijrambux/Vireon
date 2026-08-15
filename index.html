@@ -1032,13 +1032,10 @@
         }
     </style>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<!-- VIREON FIREBASE SYNC -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <script>
-/* ═══════════════════════════════════════
-   VIREON — Firebase Live Sync
-   ═══════════════════════════════════════ */
 const FIREBASE_CONFIG = {
   apiKey: "YOUR_API_KEY",
   authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -1048,70 +1045,33 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "YOUR_SENDER_ID",
   appId: "YOUR_APP_ID"
 };
-
-let fbApp=null, db=null, useLocal=false, liveData={settings:{},content:null};
-
-function initVireonSync(){
+let db=null, fbApp=null, liveSettings={}, liveContent=null;
+function initVireon(){
   const hasCfg = FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes('YOUR');
-  if(!hasCfg){
-    console.log('Vireon: Firebase not configured, using localStorage fallback');
-    useLocal=true;
-    loadLocalData();
-    return;
-  }
+  if(!hasCfg){console.log('Vireon: Firebase not configured');loadLocalFallback();return;}
   try{
     fbApp=firebase.initializeApp(FIREBASE_CONFIG);
     db=firebase.database();
-    // Listen to settings
-    db.ref('vireon/settings').on('value',snap=>{
-      const s=snap.val()||{};
-      liveData.settings=s;
-      applySettings(s);
-    });
-    // Listen to content
-    db.ref('vireon/content').on('value',snap=>{
-      const c=snap.val();
-      if(c){liveData.content=c;applyContent(c);}
-    });
-    console.log('Vireon: Connected to Firebase realtime');
-  }catch(e){
-    console.error('Vireon Firebase error:',e);
-    useLocal=true;loadLocalData();
-  }
+    db.ref('vireon/settings').on('value',snap=>{const s=snap.val()||{};liveSettings=s;applyLiveSettings(s);});
+    db.ref('vireon/content').on('value',snap=>{const c=snap.val();if(c){liveContent=c;window.__vireonLiveContent=c;}});
+    console.log('Vireon: Firebase connected');
+  }catch(e){console.error('Vireon Firebase error:',e);loadLocalFallback();}
 }
-
-function loadLocalData(){
-  try{
-    const s=localStorage.getItem('vireon_settings');
-    const c=localStorage.getItem('vireon_content');
-    if(s)applySettings(JSON.parse(s));
-    if(c)applyContent(JSON.parse(c));
-  }catch(e){}
+function loadLocalFallback(){
+  try{const s=localStorage.getItem('vireon_settings');const c=localStorage.getItem('vireon_content');if(s)applyLiveSettings(JSON.parse(s));if(c){liveContent=JSON.parse(c);window.__vireonLiveContent=liveContent;}}
+  catch(e){}
 }
-
-function applySettings(s){
+function applyLiveSettings(s){
   if(s.siteName)document.title=s.siteName;
-  if(s.welcomeMsg){
-    const sp=document.getElementById('splashText');
-    if(sp)sp.textContent=s.welcomeMsg;
-  }
+  if(s.welcomeMsg){const el=document.getElementById('splashText');if(el)el.textContent=s.welcomeMsg;}
   if(s.channelUrl)window.__vireonChannelUrl=s.channelUrl;
   if(s.countdownTime)window.__vireonCountdown=parseInt(s.countdownTime);
   if(s.starsCount)window.__vireonStars=parseInt(s.starsCount);
   if(s.soundEnabled===false)window.__vireonSoundOff=true;
   if(s.newsEnabled===false)window.__vireonNewsOff=true;
-  if(s.primaryColor){
-    document.documentElement.style.setProperty('--v-primary',s.primaryColor);
-  }
+  if(s.primaryColor){document.documentElement.style.setProperty('--v-primary',s.primaryColor);}
 }
-
-function applyContent(c){
-  window.__vireonContent=c;
-  // The main script will check this variable
-}
-
-// Start sync
-initVireonSync();
+initVireon();
 </script>
 <base target="_blank">
 </head>
@@ -1125,7 +1085,7 @@ initVireonSync();
 
     <!-- ===== الصفحة الرئيسية ===== -->
     <div id="main-page">
-        <div class="vireon-strip" id="vireonStrip"><h1>Vireon</h1><a href="admin.html" id="adminLink" style="position:absolute;left:15px;top:50%;transform:translateY(-50%);font-size:1.2rem;color:rgba(255,255,255,.4);text-decoration:none;transition:color .3s;z-index:10;" onmouseover="this.style.color='#a5d6a7'" onmouseout="this.style.color='rgba(255,255,255,.4)'" title="لوحة التحكم">⚙️</a></div>
+        <div class="vireon-strip" id="vireonStrip"><h1>Vireon</h1><a href="https://admin-sage-ten-36.vercel.app/" target="_blank" id="adminLink" style="position:absolute;left:18px;top:50%;transform:translateY(-50%);font-size:1.3rem;color:rgba(255,255,255,.35);text-decoration:none;transition:all .3s;z-index:10;padding:6px;border-radius:10px;" onmouseover="this.style.color='#a5d6a7';this.style.background='rgba(76,175,80,.1)'" onmouseout="this.style.color='rgba(255,255,255,.35)';this.style.background='transparent'" title="لوحة التحكم">⚙️</a></div>
         <h1 id="vireonName">Vireon</h1>
 
         <div class="subscribe-container" id="subscribeContainer">
@@ -2549,7 +2509,7 @@ initVireonSync();
                 children: [secondaryYear1, secondaryYear2, secondaryYear3, branches, baccalaureate, universityGuidance]
             };
 
-            const data = window.__vireonContent || {
+            const data = window.__vireonLiveContent || {
                 name: 'الرئيسية',
                 children: [
                     childPreparation,
@@ -2814,10 +2774,5 @@ initVireonSync();
         })();
     </script>
 
-<script>
-(function(){
-  const st=window.__vireonSettings||{};
-  if(st.welcomeMsg){const el=document.getElementById('splashText');if(el)el.textContent=st.welcomeMsg;}
-})();
-</script></body>
+<script>(function(){const s=window.liveSettings||{};if(s.welcomeMsg){const el=document.getElementById("splashText");if(el)el.textContent=s.welcomeMsg;}})();</script></body>
 </html>
